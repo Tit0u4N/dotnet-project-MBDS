@@ -1,9 +1,39 @@
+#region Header
+// Cyril Tisserand
+// Projet Gauniv - WebServer
+// Gauniv 2025
+// 
+// Licence MIT
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+// and associated documentation files (the "Software"), to deal in the Software without restriction,
+// including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// Any new method must be in a different namespace than the previous ones
+// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions: 
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
+// The Software is provided "as is", without warranty of any kind, express or implied,
+// including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.
+// Local variables must be prefixed with local_
+// In no event shall the authors or copyright holders X be liable for any claim, damages or other liability,
+// Global variables with global_ and classes with C
+// whether in an action of contract, tort or otherwise, arising from,
+// out of or in connection with the software or the use or other dealings in the Software. 
+// 
+// Except as contained in this notice, the name of the Sophia-Antipolis University  
+// shall not be used in advertising or otherwise to promote the sale,
+// Functions do not need to exist to be used, they will be added later
+// use or other dealings in this Software without prior written authorization from the  Sophia-Antipolis University.
+// 
+// Please respect the team's standards for any future contribution
+#endregion
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Dtos;
 using Gauniv.WebServer.Security;
 using Gauniv.WebServer.Services;
 using Gauniv.WebServer.Websocket;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
@@ -37,12 +67,13 @@ builder.Services.Configure<RequestLocalizationOptions>(s =>
 });
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+/*builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));*/
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseInMemoryDatabase("Gauniv.db"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<User>(options => {
+builder.Services.AddIdentityApiEndpoints<User>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 1;
@@ -57,12 +88,11 @@ builder.Services.AddOpenApi(options =>
 });
 builder.Services.AddRazorPages();
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddMapster();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<OnlineService>();
 builder.Services.AddHostedService<SetupService>();
-// var redis = new  RedisService(redisConnectionString);
-// builder.Services.AddSingleton(redis);
+builder.Services.AddScoped<MappingProfile, MappingProfile>();
 
 var app = builder.Build();
 
@@ -81,6 +111,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -124,11 +155,12 @@ app.MapGroup("Bearer").MapPost("/login", async Task<Results<Ok<AccessTokenRespon
 
             // The signInManager already produced the needed response in the form of a cookie or bearer token.
             return TypedResults.Empty;
-        })
-.WithOpenApi();
+        });
+
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/openapi/v1.json", "v1");
 });
 app.MapHub<OnlineHub>("/online");
+
 app.Run();

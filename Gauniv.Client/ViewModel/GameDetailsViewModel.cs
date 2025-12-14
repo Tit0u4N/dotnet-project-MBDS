@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gauniv.Client.Services;
-using Gauniv.Client.WinUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
