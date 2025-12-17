@@ -65,7 +65,9 @@ namespace Gauniv.WebServer.Services
                 {
                     UserName = "test@test.com",
                     Email = "test@test.com",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FirstName = "test",
+                    LastName = "test"
                 }, "password").Result;
 
                 
