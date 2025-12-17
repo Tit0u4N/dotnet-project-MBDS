@@ -1,0 +1,61 @@
+@model Gauniv.WebServer.Dtos.GameFullDto
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-5">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            &larr; Back
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Large Image -->
+        <div class="col-md-5 mb-4">
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://placehold.co/600x800?text=No+Image" : Model.ImageUrl)" 
+                 class="img-fluid rounded shadow" 
+                 alt="@Model.Name" 
+                 style="width: 100%; object-fit: cover;">
+        </div>
+
+        <!-- Right Column: Info -->
+        <div class="col-md-7">
+            <h1>@Model.Name</h1>
+            <p class="text-muted">Released on @Model.ReleaseDate.ToShortDateString()</p>
+            
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-warning text-dark me-2">★ @(Model.Rating)/5</span>
+                <span class="h3 mb-0 text-primary">@Model.Price.ToString("C")</span>
+            </div>
+
+            <hr>
+
+            <h4>Description</h4>
+            <p class="lead">
+                @(string.IsNullOrEmpty(Model.Description) ? "No description available." : Model.Description)
+            </p>
+
+            <div class="mt-4">
+                <!-- Categories if available -->
+                @if (Model.GameCategories != null && Model.GameCategories.Any())
+                {
+                    <div class="mb-3">
+                        <strong>Categories:</strong>
+                        @foreach (var cat in Model.GameCategories)
+                        {
+                            <span class="badge bg-secondary me-1">@cat.CategoryId</span> 
+                            <!-- Assuming only CategoryId is directly available in association, 
+                                 need verification if GameCategory has navigation to Category. 
+                                 GameCategory usually links Game and Category. -->
+                        }
+                    </div>
+                }
+                
+                <!-- Buy Button could go here -->
+                <button class="btn btn-success btn-lg" disabled title="Not implemented yet">Buy Now</button>
+            </div>
+        </div>
+    </div>
+</div>

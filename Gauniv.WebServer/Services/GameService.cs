@@ -47,6 +47,12 @@ public class GameService
         return existingGame.Adapt<GameFullDto>();
     }
 
+    public async Task<GameFullDto?> GetGameByIdAsync(int gameId)
+    {
+        var game = await _context.Games.FindAsync(gameId);
+        return game?.Adapt<GameFullDto>();
+    }
+
     public async Task<bool> BuyGameAsync(int gameId, string userId)
     {
         var game = await _context.Games.FindAsync(gameId);
@@ -72,7 +78,7 @@ public class GameService
         return true;
     }
 
-    public async Task<List<GameFullDto>> GetAllGamesAsync(
+    public async Task<(List<GameFullDto> Games, int TotalCount)> GetAllGamesAsync(
         string? name = null,
         decimal? minPrice = null,
         decimal? maxPrice = null,
@@ -122,10 +128,14 @@ public class GameService
             }
         }
         
+        var totalCount = await query.CountAsync();
+
         query = query
+            .OrderBy(g => g.Id)
             .Skip(offset)
             .Take(limit);
 
-        return await query.ProjectToType<GameFullDto>().ToListAsync();
+        var games = await query.ProjectToType<GameFullDto>().ToListAsync();
+        return (games, totalCount);
     }
 }

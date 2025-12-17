@@ -1,0 +1,22 @@
+<form method="get" class="mb-4 p-3 steam-filter-box rounded">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label for="name" class="form-label">Search</label>
+            <input type="text" class="form-control" id="name" name="name" value="@ViewBag.Name" placeholder="Game name...">
+        </div>
+        <div class="col-md-3">
+            <label for="minPrice" class="form-label">Min Price</label>
+            <input type="number" class="form-control" id="minPrice" name="minPrice" value="@ViewBag.MinPrice" step="0.01" min="0">
+        </div>
+        <div class="col-md-3">
+            <label for="maxPrice" class="form-label">Max Price</label>
+            <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@ViewBag.MaxPrice" step="0.01" min="0">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+    <!-- Preserve pagination reset on filter -->
+    <input type="hidden" name="offset" value="0" />
+    <input type="hidden" name="limit" value="@ViewBag.Limit" />
+</form>

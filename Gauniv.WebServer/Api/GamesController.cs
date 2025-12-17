@@ -88,7 +88,7 @@ namespace Gauniv.WebServer.Api
         }
 
         [HttpGet("all")]
-        public async Task<ActionResult<List<GameFullDto>>> GetAllGames(
+        public async Task<IActionResult> GetAllGames(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 10,
             [FromQuery] string? name = null,
@@ -107,8 +107,18 @@ namespace Gauniv.WebServer.Api
                 // But for strict filtering, we pass userId if available.
             }
 
-            var games = await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
-            return Ok(games);
+            var (games, total) = await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
+            
+            var totalPages = limit > 0 ? (int)Math.Ceiling(total / (double)limit) : 0;
+            
+            return Ok(new 
+            {
+                Total = total,
+                TotalPages = totalPages,
+                Offset = offset,
+                Limit = limit,
+                Results = games
+            });
         }
     }
 }

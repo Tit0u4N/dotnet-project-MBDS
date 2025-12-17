@@ -1,6 +1,6 @@
 @model IEnumerable<Gauniv.WebServer.Dtos.GameFullDto>
 @{
-    ViewData["Title"] = "My Games";
+    ViewData["Title"] = "Game Catalog";
     int offset = ViewBag.Offset ?? 0;
     int limit = ViewBag.Limit ?? 20;
     int total = ViewBag.Total ?? 0;
@@ -10,17 +10,16 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>My Games</h1>
-        <a asp-action="Games" class="btn btn-outline-primary">Browse Store</a>
+        <h1>All Games</h1>
+        <a asp-action="MyGame" class="btn btn-outline-success">View My Library</a>
     </div>
 
-    <!-- Reusing the filter component -->
     <partial name="_GameFilter" />
 
     @if (!Model.Any())
     {
-        <div class="alert alert-secondary text-center">
-            You don't own any games yet. <a asp-action="Games">Go buy some!</a>
+        <div class="alert alert-info text-center">
+            No games found matching your criteria.
         </div>
     }
     else
@@ -40,7 +39,7 @@
             <nav class="mt-4" aria-label="Game navigation">
                 <ul class="pagination justify-content-center">
                     <li class="page-item @(offset == 0 ? "disabled" : "")">
-                        <a class="page-link" asp-action="MyGame" 
+                        <a class="page-link" asp-action="Games" 
                            asp-route-offset="@(Math.Max(0, offset - limit))" 
                            asp-route-limit="@limit"
                            asp-route-name="@ViewBag.Name"
@@ -49,7 +48,7 @@
                     </li>
                     <li class="page-item disabled"><span class="page-link">Page @currentPage of @totalPages</span></li>
                     <li class="page-item @(offset + limit >= total ? "disabled" : "")">
-                        <a class="page-link" asp-action="MyGame" 
+                        <a class="page-link" asp-action="Games" 
                            asp-route-offset="@(offset + limit)" 
                            asp-route-limit="@limit"
                            asp-route-name="@ViewBag.Name"
