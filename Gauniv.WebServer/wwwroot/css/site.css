@@ -1,31 +1,168 @@
-html {
-  font-size: 14px;
+:root {
+  --steam-bg-dark: #1b2838;
+  --steam-header-bg: #171a21;
+  --steam-text-light: #c6d4df;
+  --steam-text-highlight: #66c0f4;
+  --steam-btn-gradient-top: #47bfff;
+  --steam-btn-gradient-bottom: #1a44c2;
+  --steam-card-bg: #101822;
+  /* Slightly darker/different for panels */
+  --steam-input-bg: #2a3f5a;
+  --steam-border: #2a475e;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
+html,
+body {
+  background-color: var(--steam-bg-dark);
+  color: var(--steam-text-light);
+  font-family: "Motiva Sans", Sans-serif, "Helvetica Neue", Helvetica, Arial;
+  /* Common Steam fonts */
+}
+
+a {
+  color: var(--steam-text-highlight);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Header / Navbar Overrides */
+.navbar {
+  background-color: var(--steam-header-bg) !important;
+  border-bottom: 2px solid var(--steam-btn-gradient-bottom) !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand,
+.nav-link {
+  color: #b8b6b4 !important;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+  
+  > span {
+    font-size: 10px !important;
+    margin-left: 2px;
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.navbar-brand:hover,
+.nav-link:hover {
+  color: var(--steam-text-highlight) !important;
 }
 
-html {
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(to bottom, var(--steam-btn-gradient-top) 5%, var(--steam-btn-gradient-bottom) 95%);
+  border: none;
+  color: white;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to bottom, #66c0f4 5%, #1a44c2 95%);
+  color: #fff;
+}
+
+/* Cards / Containers */
+.card,
+.jumbotron {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--steam-border);
+  color: var(--steam-text-light);
+}
+
+/* Forms */
+.form-control {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid #000;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.form-control:focus {
+  background-color: #2a3f5a;
+  border-color: var(--steam-text-highlight);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Floating labels adjustments for dark theme */
+.form-floating>label {
+  color: #8f98a0;
+}
+
+.form-floating>.form-control:focus~label,
+.form-floating>.form-control:not(:placeholder-shown)~label {
+  color: var(--steam-text-highlight);
+  opacity: 1;
+  /* Ensure visibility */
+}
+
+.form-floating>.form-control:-webkit-autofill {
+  -webkit-text-fill-color: #fff !important;
+  -webkit-box-shadow: 0 0 0 30px #2a3f5a inset !important;
+}
+
+/* Table overrides if present */
+.table {
+  color: var(--steam-text-light);
+}
+
+.table thead th {
+  border-color: var(--steam-border);
+}
+
+.table td,
+.table th {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--steam-header-bg);
+  border-top: 1px solid var(--steam-border);
+  color: #8f98a0;
+  padding: 20px 0;
   position: relative;
-  min-height: 100%;
+  /* Changing from absolute to let it flow naturally if content is long */
+  width: 100%;
 }
 
-body {
-  margin-bottom: 60px;
+/* Utilities */
+.text-dark {
+  color: var(--steam-text-light) !important;
+  /* Force overrides for bootstrap utility */
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.bg-white {
+  background-color: var(--steam-header-bg) !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.border-bottom {
+  border-bottom: 1px solid var(--steam-border) !important;
+}
+
+/* Title helpers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #fff;
+  font-weight: 300;
+}
+
+/* Helper for standard bootstrap layouts */
+main {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  padding: 20px;
+  border-radius: 4px;
+  margin-top: 20px;
 }

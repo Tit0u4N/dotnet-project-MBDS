@@ -1,23 +1,74 @@
 ﻿@model List<Gauniv.WebServer.Data.Game>
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
+@using Microsoft.AspNetCore.Identity
+@using Gauniv.WebServer.Data
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
 @{
-    ViewData["Title"] = "View";
+    ViewData["Title"] = "Home Page";
 }
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
-<h1>View</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="text-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <h1 class="display-4">Welcome</h1>
+        <p>
+            <a asp-controller="Home" asp-action="MyGame" class="btn btn-primary">Manage my game</a>
+        </p>
+
+        <table class="table text-start">
+             <tbody>
+                @foreach (var item in Model) {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="jumbotron p-5 mb-4 rounded-3 text-center" style="background: linear-gradient(135deg, var(--steam-bg-dark) 0%, var(--steam-header-bg) 100%); border: 1px solid var(--steam-border); box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <h1 class="display-3 fw-bold mb-3" style="color: #fff; text-shadow: 0 0 10px rgba(71, 191, 255, 0.5);">Manage & Share Your Games</h1>
+            <p class="lead mb-4" style="color: var(--steam-text-light);">
+                The essential dashboard for game developers. Add new titles, update descriptions, refine details, and showcase your creations to the world.
+            </p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                 <a class="btn btn-primary btn-lg px-4 gap-3" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                 <a class="btn btn-outline-light btn-lg px-4" asp-area="Identity" asp-page="/Account/Register" style="color: var(--steam-text-highlight); border-color: var(--steam-text-highlight);">Register</a>
+            </div>
+        </div>
+
+        <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+            <div class="col">
+                <div class="card h-100 p-4 border-0 shadow-sm" style="background-color: rgba(0, 0, 0, 0.2);">
+                    <div class="card-body">
+                         <h2 class="h4 mb-3" style="color: var(--steam-text-highlight);">Effortless Management</h2>
+                         <p class="card-text">Add, remove, and organize your games with ease. Keep your portfolio clean and up-to-date in one central hub.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 p-4 border-0 shadow-sm" style="background-color: rgba(0, 0, 0, 0.2);">
+                    <div class="card-body">
+                         <h2 class="h4 mb-3" style="color: var(--steam-text-highlight);">Full Control</h2>
+                         <p class="card-text">Edit game names, descriptions, and details instantly. Ensure your players always have the latest information about your titles.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="col">
+                <div class="card h-100 p-4 border-0 shadow-sm" style="background-color: rgba(0, 0, 0, 0.2);">
+                     <div class="card-body">
+                         <h2 class="h4 mb-3" style="color: var(--steam-text-highlight);">Showcase Your Work</h2>
+                         <p class="card-text">Publish your games for the world to see. Connect with players, receive feedback, and grow your audience globally.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
