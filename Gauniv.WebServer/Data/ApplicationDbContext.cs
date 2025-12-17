@@ -39,5 +39,18 @@ namespace Gauniv.WebServer.Data
         {
         }
         public DbSet<Game> Games { get; set; }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Game <-> Category
+            modelBuilder.Entity<GameCategory>()
+                .HasKey(gc => new { gc.GameId, gc.CategoryId });
+
+            // User <-> Game (achat)
+            modelBuilder.Entity<UserGame>()
+                .HasKey(ug => new { ug.UserId, ug.GameId });
+        }
     }
 }

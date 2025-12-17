@@ -68,11 +68,27 @@ namespace Gauniv.WebServer.Services
                     EmailConfirmed = true
                 }, "password").Result;
 
-                // ....
+                
+                CreateRoles(scope.ServiceProvider).RunSynchronously();
 
                 applicationDbContext.SaveChanges();
 
                 return Task.CompletedTask;
+            }
+        }
+        
+        private static async Task CreateRoles(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            string[] roles = { "Admin", "User" };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
             }
         }
 

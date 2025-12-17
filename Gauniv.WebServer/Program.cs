@@ -67,10 +67,10 @@ builder.Services.Configure<RequestLocalizationOptions>(s =>
 });
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-/*builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));*/
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("Gauniv.db"));
+    options.UseNpgsql(connectionString));
+/*builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseInMemoryDatabase("Gauniv.db"));*/
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityApiEndpoints<User>(options => {
