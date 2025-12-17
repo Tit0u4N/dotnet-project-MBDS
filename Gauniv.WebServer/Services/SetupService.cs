@@ -48,7 +48,7 @@ namespace Gauniv.WebServer.Services
             this.serviceProvider = serviceProvider;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             using (var scope = serviceProvider.CreateScope()) // this will use `IServiceScopeFactory` internally
             {
@@ -69,11 +69,16 @@ namespace Gauniv.WebServer.Services
                 }, "password").Result;
 
                 
-                CreateRoles(scope.ServiceProvider).RunSynchronously();
+                await CreateRoles(scope.ServiceProvider);
+                
+                var seeder = new GameSeeder(applicationDbContext);
+                var path = Path.Combine(
+                    AppContext.BaseDirectory,
+                    "Data", "games.csv"
+                );
+                await seeder.SeedGamesFromCsvAsync(path);
 
                 applicationDbContext.SaveChanges();
-
-                return Task.CompletedTask;
             }
         }
         

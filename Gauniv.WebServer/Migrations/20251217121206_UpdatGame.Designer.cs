@@ -3,6 +3,7 @@ using System;
 using Gauniv.WebServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gauniv.WebServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217121206_UpdatGame")]
+    partial class UpdatGame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +40,7 @@ namespace Gauniv.WebServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("Gauniv.WebServer.Data.Game", b =>
@@ -100,7 +103,7 @@ namespace Gauniv.WebServer.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("GameCategories");
+                    b.ToTable("GameCategory");
                 });
 
             modelBuilder.Entity("Gauniv.WebServer.Data.User", b =>
@@ -197,7 +200,7 @@ namespace Gauniv.WebServer.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("UserGames");
+                    b.ToTable("UserGame");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

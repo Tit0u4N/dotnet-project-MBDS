@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Mapster" Version="9.0.0-pre01" />
     <PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
     <PackageReference Include="Mapster.EFCore" Version="9.0.0-pre01" />
@@ -44,5 +45,12 @@
 
   <ItemGroup>
     <None Include="D:\Université\2025-26\TP2.NET\Gauniv.WebServer\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Data\games.csv" />
+    <Content Include="Data\games.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

@@ -56,6 +56,14 @@ namespace Gauniv.WebServer.Data
 
         [Range(0, 5)]
         public double Rating { get; set; }
+        
+        public int ReviewCount { get; set; }
+        
+        [MaxLength(150)]
+        public string Developer { get; set; } = null!;
+        
+        [MaxLength(150)]
+        public string Publisher { get; set; } = null!;
 
         // Relations
         public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
