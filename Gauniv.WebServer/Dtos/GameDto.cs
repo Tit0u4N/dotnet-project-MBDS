@@ -34,10 +34,45 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 
-namespace Gauniv.WebServer.Dtos
+namespace Gauniv.WebServer.Dtos;
+
+public class GameFullDto
 {
-    public class GameDto
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public string? ImageUrl { get; set; }
+    public DateTime ReleaseDate { get; set; }
+    public double Rating { get; set; }
+    public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
 }
+
+
+public class GameCreateOrEditDto
+{
+    [Required(ErrorMessage = "Name is required.")]
+    [MinLength(2, ErrorMessage = "Name must contain at least 2 characters.")]
+    public string Name { get; set; } = null!;
+
+    [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters.")]
+    public string? Description { get; set; }
+
+    [Required(ErrorMessage = "Price is required.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
+    public decimal? Price { get; set; }
+
+    [Url(ErrorMessage = "ImageUrl must be a valid URL.")]
+    public string? ImageUrl { get; set; }
+
+    [Required(ErrorMessage = "Release date is required.")]
+    public DateTime? ReleaseDate { get; set; }
+
+    [Range(0, 10, ErrorMessage = "Rating must be between 0 and 10.")]
+    public double? Rating { get; set; }
+
+    public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
+}
+
+
+    
