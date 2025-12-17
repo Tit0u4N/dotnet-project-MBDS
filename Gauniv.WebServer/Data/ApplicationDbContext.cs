@@ -39,6 +39,7 @@ namespace Gauniv.WebServer.Data
         {
         }
         public DbSet<Game> Games { get; set; }
+        public DbSet<Category> Category { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
