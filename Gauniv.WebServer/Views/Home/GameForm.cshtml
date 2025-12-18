@@ -1,0 +1,83 @@
+@model Gauniv.WebServer.Dtos.GameCreateOrEditDto
+
+<div class="row g-3">
+    <div class="col-12">
+        <label asp-for="Name" class="form-label">Title</label>
+        <input asp-for="Name" class="form-control" placeholder="Game Title">
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    
+    <div class="col-12">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Developer" class="form-label">Developer</label>
+        <input asp-for="Developer" class="form-control" placeholder="Studio Name">
+        <span asp-validation-for="Developer" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Publisher" class="form-label">Publisher</label>
+        <input asp-for="Publisher" class="form-control" placeholder="Publisher Name">
+        <span asp-validation-for="Publisher" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Price" class="form-label">Price</label>
+        <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input asp-for="Price" class="form-control" type="number" step="0.01" min="0">
+        </div>
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Rating" class="form-label">Rating (0-5)</label>
+        <input asp-for="Rating" class="form-control" type="number" step="0.1" min="0" max="5">
+        <span asp-validation-for="Rating" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="ReleaseDate" class="form-label">Release Date</label>
+        <input asp-for="ReleaseDate" class="form-control" type="date">
+        <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="ImageUrl" class="form-label">Cover Image URL</label>
+        <input asp-for="ImageUrl" class="form-control" placeholder="https://...">
+        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Categories</label>
+        <div class="card">
+            <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                @if (ViewBag.AllCategories != null)
+                {
+                    @foreach (var category in ViewBag.AllCategories as IEnumerable<Gauniv.WebServer.Dtos.CategoryFullDto>)
+                    {
+                        var isSelected = Model.Categories != null && Model.Categories.Contains(category.Title);
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="Categories" 
+                                   value="@category.Title" id="cat_@category.Id"
+                                   @(isSelected ? "checked" : "")>
+                            <label class="form-check-label" for="cat_@category.Id">
+                                @category.Title
+                            </label>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No categories available.</p>
+                }
+            </div>
+        </div>
+        <div class="form-text">Select one or more categories.</div>
+    </div>
+</div>
+

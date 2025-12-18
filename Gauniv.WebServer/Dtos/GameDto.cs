@@ -26,12 +26,7 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
-using Elfie.Serialization;
-using Gauniv.WebServer.Data;
-using Gauniv.WebServer.Dtos;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
 
 
 namespace Gauniv.WebServer.Dtos;
@@ -45,6 +40,8 @@ public class GameFullDto
     public string? ImageUrl { get; set; }
     public DateTime ReleaseDate { get; set; }
     public double Rating { get; set; }
+    public string Developer { get; set; } = null!;
+    public string Publisher { get; set; } = null!;
     public ICollection<CategoryFullDto> GameCategories { get; set; }
 }
 
@@ -58,7 +55,7 @@ public class GameCreateOrEditDto
     public string? Description { get; set; }
 
     [Required(ErrorMessage = "Price is required.")]
-    [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
+    [Range(0, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
     public decimal? Price { get; set; }
 
     [Url(ErrorMessage = "ImageUrl must be a valid URL.")]
@@ -67,10 +64,18 @@ public class GameCreateOrEditDto
     [Required(ErrorMessage = "Release date is required.")]
     public DateTime? ReleaseDate { get; set; }
 
-    [Range(0, 10, ErrorMessage = "Rating must be between 0 and 10.")]
+    [Range(0, 5, ErrorMessage = "Rating must be between 0 and 5.")]
     public double? Rating { get; set; }
 
-    public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
+    [Required(ErrorMessage = "Developer is required.")]
+    [MaxLength(150, ErrorMessage = "Developer cannot exceed 150 characters.")]
+    public string Developer { get; set; } = null!;
+
+    [Required(ErrorMessage = "Publisher is required.")]
+    [MaxLength(150, ErrorMessage = "Publisher cannot exceed 150 characters.")]
+    public string Publisher { get; set; } = null!;
+
+    public List<string> Categories { get; set; } = new List<string>();
 }
 
 

@@ -25,7 +25,9 @@
 // use or other dealings in this Software without prior written authorization from the  Sophia-Antipolis University.
 // 
 // Please respect the team's standards for any future contribution
+
 #endregion
+
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Dtos;
 using Gauniv.WebServer.Services;
@@ -46,7 +48,10 @@ namespace Gauniv.WebServer.Api
 {
     [Route("game")]
     [ApiController]
-    public class GamesController(GameService gameService, UserManager<User> userManager) : ControllerBase
+    public class GamesController(
+        GameService gameService,
+        UserManager<User> userManager,
+        MappingProfile mappingProfile) : ControllerBase
     {
         private readonly GameService _gameService = gameService;
         private readonly UserManager<User> _userManager = userManager;
@@ -75,7 +80,7 @@ namespace Gauniv.WebServer.Api
         }
 
         [HttpPost("{id}/buy")]
-        [Authorize] 
+        [Authorize]
         public async Task<IActionResult> BuyGame(int id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -83,10 +88,10 @@ namespace Gauniv.WebServer.Api
 
             var success = await _gameService.BuyGameAsync(id, user.Id);
             if (!success) return BadRequest("Unable to purchase game. It might not exist or you already own it.");
-            
+
             return Ok();
         }
-        
+
         [HttpGet("details/{id}")]
         public async Task<IActionResult> GetGameById([FromRoute] int id)
         {
@@ -94,7 +99,7 @@ namespace Gauniv.WebServer.Api
             if (game == null) return NotFound();
             return Ok(game);
         }
-        
+
         [HttpGet("all")]
         public async Task<ActionResult<PaginatedGamesDto>> GetAllGames(
             [FromQuery] int offset = 0,
@@ -115,8 +120,9 @@ namespace Gauniv.WebServer.Api
                 // But for strict filtering, we pass userId if available.
             }
 
-            var (games, total) = await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
-            
+            var (games, total) =
+                await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
+
             var totalPages = limit > 0 ? (int)Math.Ceiling(total / (double)limit) : 0;
 
             var dto = new PaginatedGamesDto

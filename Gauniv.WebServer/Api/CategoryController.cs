@@ -6,7 +6,9 @@ namespace Gauniv.WebServer.Api;
 
 [Route("category")]
 [ApiController]
-public class CategoryController(CategoryService categoryService) : ControllerBase
+public class CategoryController(
+    CategoryService categoryService,
+    MappingProfile mappingProfile) : ControllerBase
 {
     private readonly CategoryService _categoryService = categoryService;
 
