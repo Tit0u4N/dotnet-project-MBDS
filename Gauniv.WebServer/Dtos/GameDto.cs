@@ -75,4 +75,14 @@ public class GameCreateOrEditDto
 }
 
 
+public class PaginatedGamesDto
+{
+    public IEnumerable<GameFullDto> Results { get; set; } = null!;
+    public int Total { get; set; }
+    public int TotalPages { get; set; }
+    public int Offset { get; set; }
+    public int Limit { get; set; }
+    
+}
+
     

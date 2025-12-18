@@ -35,15 +35,21 @@ public class LoginViewModel : ObservableObject
 
     private async void OnLogin()
     {
-        if (Username == "admin" && Password == "1234")
+        try
         {
-            NetworkService.Instance.Token = "fake-jwt";
-            NetworkService.Instance.connected();
-            NavigationService.Instance.Navigate<Profile>([]);
+            bool success = await NetworkService.Instance.Login(Username, Password);
+            if (success)
+            {
+                NavigationService.Instance.Navigate<Index>([]);
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Identifiants incorrects", "OK");
+            }
         }
-        else
+        catch (Exception)
         {
-            await Application.Current.MainPage.DisplayAlert("Erreur", "Identifiants incorrects", "OK");
+            await Application.Current.MainPage.DisplayAlert("Erreur", "Une erreur est survenue lors de la connexion", "OK");
         }
     }
 }

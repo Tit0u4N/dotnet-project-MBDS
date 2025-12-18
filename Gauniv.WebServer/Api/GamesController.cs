@@ -88,7 +88,7 @@ namespace Gauniv.WebServer.Api
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllGames(
+        public async Task<ActionResult<PaginatedGamesDto>> GetAllGames(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 10,
             [FromQuery] string? name = null,
@@ -110,15 +110,17 @@ namespace Gauniv.WebServer.Api
             var (games, total) = await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
             
             var totalPages = limit > 0 ? (int)Math.Ceiling(total / (double)limit) : 0;
-            
-            return Ok(new 
+
+            var dto = new PaginatedGamesDto
             {
                 Total = total,
                 TotalPages = totalPages,
                 Offset = offset,
                 Limit = limit,
                 Results = games
-            });
+            };
+            
+            return Ok(dto);
         }
     }
 }

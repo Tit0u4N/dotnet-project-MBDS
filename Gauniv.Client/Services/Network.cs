@@ -35,6 +35,7 @@ using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
+using Gauniv.Client.Proxy;
 
 namespace Gauniv.Client.Services
 {
@@ -44,17 +45,41 @@ namespace Gauniv.Client.Services
         public static NetworkService Instance { get; private set; } = new NetworkService();
         [ObservableProperty]
         private string token;
-        public HttpClient httpClient;
+        private Gauniv_WebServerClient _webServerClient;
+        public GamesClient GamesClient;
 
-        public NetworkService() {
-            httpClient = new HttpClient();
+        private NetworkService()
+        {
             Token = null;
+            _webServerClient = new Gauniv_WebServerClient(new HttpClient());
+            GamesClient = new GamesClient(new HttpClient());
+            GamesClient.ReadResponseAsString = true;
         }
 
-        public event Action OnConnected;
+        public event Action? OnConnected;
         
-        public void connected() {
-            OnConnected?.Invoke();
+        public async Task<bool> Login(string username, string password)
+        {
+            try
+            {
+                var body = new LoginRequest
+                {
+                    Email = username,
+                    Password = password
+                };
+                // Call the login method
+                var response = await _webServerClient.LoginAsync(body, false, false);
+                Token = response.AccessToken;
+                
+                OnConnected?.Invoke();
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Login failed: {e.Message}");
+                return false;
+            }
         }
 
     }
