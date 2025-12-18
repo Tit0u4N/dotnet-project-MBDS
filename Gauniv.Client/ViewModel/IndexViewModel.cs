@@ -44,6 +44,10 @@ namespace Gauniv.Client.ViewModel
         [ObservableProperty]
         private string? errorMessage;
 
+        //Selected item bindé depuis le XAML
+        [ObservableProperty]
+        private GameFullDto? selectedGame;
+
         public int CurrentPageDisplay => Math.Max(1, PageIndex + 1);
 
         public IndexViewModel()
@@ -69,6 +73,33 @@ namespace Gauniv.Client.ViewModel
         partial void OnTotalPagesChanged(int value)
         {
             OnPropertyChanged(nameof(CurrentPageDisplay));
+        }
+
+        // Appelé automatiquement lorsque SelectedGame change via le binding XAML
+        partial void OnSelectedGameChanged(GameFullDto? value)
+        {
+            // value peut être null quand la sélection est désélectionnée; ignorer
+            if (value == null) return;
+
+            // Navigation asynchrone fire-and-forget (UI thread)
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                try
+                {
+                    // Naviguer vers la page de détails
+                    var args = new Dictionary<string, object> { { "game", value } };
+                    NavigationService.Instance.Navigate<GameDetails>(args);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    // reset selection pour permettre de recliquer le même élément
+                    SelectedGame = null;
+                }
+            });
         }
 
         [RelayCommand]
@@ -145,28 +176,6 @@ namespace Gauniv.Client.ViewModel
         {
             PageIndex = 0;
             await LoadGamesAsync();
-        }
-
-        [RelayCommand]
-        private void OpenDetails(object parameter)
-        {
-            GameFullDto? game = null;
-            if (parameter is SelectionChangedEventArgs sce)
-            {
-                game = sce.CurrentSelection?.FirstOrDefault() as GameFullDto;
-            }
-            else if (parameter is GameFullDto g)
-            {
-                game = g;
-            }
-            Console.WriteLine(game);
-
-            if (game == null) return;
-            var args = new Dictionary<string, object>
-            {
-                { "id", game.Id }
-            };
-            NavigationService.Instance.Navigate<GameDetails>(args);
         }
     }
 }

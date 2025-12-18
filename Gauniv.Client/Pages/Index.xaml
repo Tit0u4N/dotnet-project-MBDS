@@ -71,7 +71,7 @@ Please respect the team's standards for any future contribution
         <!-- Games grid: occupe l'espace restant et est scrollable -->
         <Grid Grid.Row="2">
             <!-- CollectionView principal -->
-            <CollectionView x:Name="GamesCollection" ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChangedCommand="{Binding OpenDetailsCommand}" MaximumWidthRequest="1100" VerticalOptions="FillAndExpand">
+            <CollectionView x:Name="GamesCollection" ItemsSource="{Binding Games}" SelectionMode="Single" SelectedItem="{Binding SelectedGame, Mode=TwoWay}" MaximumWidthRequest="1100" VerticalOptions="FillAndExpand">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"  />
                 </CollectionView.ItemsLayout>

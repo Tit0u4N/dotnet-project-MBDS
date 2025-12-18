@@ -35,12 +35,12 @@ Please respect the team's standards for any future contribution
              Title="GameDetails"
              BindingContext="{vm:GameDetailsViewModel}"
              x:DataType="vm:GameDetailsViewModel">
-    <Label Text="Game details" />
-    <!-- 
-    On veut afficher le detail d'un jeu: nom, description
-    si il est possédé
-    - si oui
-        si il est en cours de téléchargement, si il est en cours de jeu, si il est installé
-    - si non le prix et la possibilité d'achat
-    -->
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="8">
+            <Label Text="Game details" FontAttributes="Bold" />
+            <Label Text="Paramètres reçus:" />
+            <Label Text="{Binding ArgsDisplay}" LineBreakMode="WordWrap" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
+
