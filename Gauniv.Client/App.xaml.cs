@@ -33,6 +33,19 @@ namespace Gauniv.Client
         public App()
         {
             InitializeComponent();
+            
+            
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Console.WriteLine("Unhandled exception:");
+                Console.WriteLine(e.ExceptionObject);
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                Console.WriteLine("Unobserved task exception:");
+                Console.WriteLine(e.Exception);
+            };
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

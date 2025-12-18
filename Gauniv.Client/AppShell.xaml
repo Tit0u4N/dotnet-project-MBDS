@@ -19,9 +19,41 @@
                 Route="games">
         <ShellContent ContentTemplate="{DataTemplate local:Index}" />
     </FlyoutItem>
+    <FlyoutItem Title="Login"
+                Route="login">
+        <FlyoutItem.Style>
+            <Style TargetType="FlyoutItem">
+                <Setter Property="IsVisible"
+                        Value="true" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="FlyoutItem"
+                                 Binding="{Binding IsConnected}"
+                                 Value="True">
+                        <Setter Property="IsVisible"
+                                Value="false" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </FlyoutItem.Style>
+        <ShellContent ContentTemplate="{DataTemplate local:LoginPage}" />
+    </FlyoutItem>
 
     <FlyoutItem Title="Profile"
                 Route="profile">
+        <FlyoutItem.Style>
+            <Style TargetType="FlyoutItem">
+                <Setter Property="IsVisible"
+                        Value="false" />
+                <Style.Triggers>
+                    <DataTrigger TargetType="FlyoutItem"
+                                 Binding="{Binding IsConnected}"
+                                 Value="True">
+                        <Setter Property="IsVisible"
+                                Value="True" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </FlyoutItem.Style>
         <ShellContent ContentTemplate="{DataTemplate local:Profile}" />
     </FlyoutItem>
     <FlyoutItem Title="My Games"

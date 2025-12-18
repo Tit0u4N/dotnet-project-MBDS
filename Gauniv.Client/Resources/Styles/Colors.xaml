@@ -6,18 +6,29 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
+    <Color x:Key="Primary">#2a3f5a</Color>
+    <Color x:Key="PrimaryDark">#2a3f5a</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <Color x:Key="Secondary">#c6d4df</Color>
+    <Color x:Key="SecondaryDarkText">#66c0f4</Color>
+    <Color x:Key="Tertiary">#47bfff</Color>
+    
+    <Color x:Key="Background">#1b2838</Color>
+    <Color x:Key="CardBackground">#101822</Color>
+    <Color x:Key="InputBackground">#2a3f5a</Color>
+    <Color x:Key="Border">#2a475e</Color>
+    <Color x:Key="TextLight">#c6d4df</Color>
+    <Color x:Key="TextHighlight">#66c0f4</Color>
+    
+    <Color x:Key="GradiantTop">#47bfff</Color>
+    <Color x:Key="GradiantBottom">#1a44c2</Color>
+    
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Magenta">#D600AA</Color>
     <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <Color x:Key="OffBlack">#1b2838</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>

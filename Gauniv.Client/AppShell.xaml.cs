@@ -26,6 +26,8 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+
+
 namespace Gauniv.Client
 {
     public partial class AppShell : Shell

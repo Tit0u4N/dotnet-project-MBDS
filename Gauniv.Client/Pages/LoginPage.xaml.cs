@@ -1,4 +1,4 @@
-﻿#region Header
+#region Header
 // Cyril Tisserand
 // Projet Gauniv - WebServer
 // Gauniv 2025
@@ -26,36 +26,12 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
-using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Security;
-using System.Text;
-using System.Threading.Tasks;
+namespace Gauniv.Client.Pages;
 
-namespace Gauniv.Client.Services
+public partial class LoginPage : ContentPage
 {
-    internal partial class NetworkService : ObservableObject
-    {
-
-        public static NetworkService Instance { get; private set; } = new NetworkService();
-        [ObservableProperty]
-        private string token;
-        public HttpClient httpClient;
-
-        public NetworkService() {
-            httpClient = new HttpClient();
-            Token = null;
-        }
-
-        public event Action OnConnected;
-        
-        public void connected() {
-            OnConnected?.Invoke();
-        }
-
-    }
+	public LoginPage()
+	{
+		InitializeComponent();
+	}
 }
