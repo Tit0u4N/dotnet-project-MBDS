@@ -30,24 +30,47 @@ Please respect the team's standards for any future contribution
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:proxy="using:Gauniv.Client.Proxy"
              x:Class="Gauniv.Client.Pages.Index"
              Title="Index"
              x:DataType="vm:IndexViewModel"
              BindingContext="{vm:IndexViewModel}">
-    <!-- 
-            A vous de créer la liste avec le bon binding. Une <ListBox>, une <CollectionView> ou autre fera l'affaire 
-            La propriété ItemsSource doit pointé vers la propiété Books de votre dataContext actuelle 
-            Utilisé ListBox.ItemTemplate pour définir comment sont affiché vos items
-            <ListBox.ItemTemplate>
-        
-            A vous de faire afficher les champs que vous voulez afficher pour savoir quel sont les livre disponible
-            <xxx Text="{Binding MyPropertyOnMyObjectBook}"/>
-            N'oublier pas non plus de rajouter un boutton (ou une autre technique) quelque part pour allez voir les détails de votre livre
-            Les propriété Command et CommandParameter pourrons vous aider ! 
-            Command="{Binding DataContext.ItemSelectedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}}" 
-            CommandParameter="{Binding .}"
-    -->
-    <Label Text="List des jeux" />
+
+    <VerticalStackLayout Padding="12">
+        <!-- Header: Search + page size picker -->
+        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+            <SearchBar Placeholder="Rechercher un jeu" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" />
+
+            <Picker Title="Par page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" />
+        </HorizontalStackLayout>
+
+        <!-- Loading indicator and error -->
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
+        <Label Text="{Binding Games.Count}" />
+        <!-- Games grid -->
+        <CollectionView ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChangedCommand="{Binding OpenDetailsCommand}">
+            <!-- <CollectionView.ItemsLayout> -->
+            <!--     <GridItemsLayout Orientation="Vertical" Span="4" /> -->
+            <!-- </CollectionView.ItemsLayout> -->
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="proxy:GameFullDto">
+                        <VerticalStackLayout>
+                            <!-- <Image Source="{Binding ImageUrl}" Aspect="AspectFill" HeightRequest="200" MaximumWidthRequest="150"/> -->
+                            <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
+                        </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Pagination controls -->
+        <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand">
+            <Button Text="Précédent" Command="{Binding PrevPageCommand}" />
+            <Label Text="{Binding CurrentPageDisplay, StringFormat='Page {0}'}" VerticalOptions="Center" />
+            <Label Text="/" VerticalOptions="Center" />
+            <Label Text="{Binding TotalPages}" VerticalOptions="Center" />
+            <Button Text="Suivant" Command="{Binding NextPageCommand}" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
 </ContentPage>
