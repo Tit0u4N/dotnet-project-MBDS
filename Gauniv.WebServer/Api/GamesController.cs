@@ -86,7 +86,15 @@ namespace Gauniv.WebServer.Api
             
             return Ok();
         }
-
+        
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> GetGameById([FromRoute] int id)
+        {
+            var game = await _gameService.GetGameByIdAsync(id);
+            if (game == null) return NotFound();
+            return Ok(game);
+        }
+        
         [HttpGet("all")]
         public async Task<ActionResult<PaginatedGamesDto>> GetAllGames(
             [FromQuery] int offset = 0,

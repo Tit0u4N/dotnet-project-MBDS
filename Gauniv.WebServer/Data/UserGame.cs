@@ -1,8 +1,10 @@
 ﻿using Gauniv.WebServer.Services;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gauniv.WebServer.Data
 {
+    [PrimaryKey(nameof(UserId), nameof(GameId))]
     public class UserGame
     {
         [Required]

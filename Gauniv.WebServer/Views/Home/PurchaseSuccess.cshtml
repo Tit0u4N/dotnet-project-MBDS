@@ -1,0 +1,33 @@
+@model Gauniv.WebServer.Dtos.GameFullDto
+@{
+    ViewData["Title"] = "Purchase Successful";
+}
+
+<div class="container mt-5 text-center">
+    <div class="card shadow-lg p-5 border-0 rounded-3">
+        <div class="card-body">
+            <h1 class="display-4 text-success mb-4">Congratulations!</h1>
+            <p class="lead mb-4">You have successfully purchased the game.</p>
+            
+            <hr class="my-4" />
+            
+            <div class="row justify-content-center align-items-center mb-5">
+                <div class="col-md-4">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://placehold.co/400x600?text=No+Image" : Model.ImageUrl)" 
+                         class="img-fluid rounded shadow" 
+                         alt="@Model.Name">
+                </div>
+                <div class="col-md-6 text-start">
+                    <h2 class="h2">@Model.Name</h2>
+                    <p class="text-muted">Released: @Model.ReleaseDate.ToShortDateString()</p>
+                    <p>@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a asp-action="Shop" class="btn btn-outline-primary btn-lg px-4 gap-3">Return to Shop</a>
+                <a asp-action="MyGames" class="btn btn-success btn-lg px-4">Go to My Games</a>
+            </div>
+        </div>
+    </div>
+</div>

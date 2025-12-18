@@ -59,10 +59,10 @@ namespace Gauniv.WebServer.Controllers
 
         public IActionResult Index()
         {
-            return RedirectToAction("Games");
+            return RedirectToAction("Shop");
         }
 
-        public async Task<IActionResult> Games(
+        public async Task<IActionResult> Shop(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
             [FromQuery] string? name = null,
@@ -82,7 +82,7 @@ namespace Gauniv.WebServer.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> MyGame(
+        public async Task<IActionResult> MyGames(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
             [FromQuery] string? name = null,
@@ -90,7 +90,7 @@ namespace Gauniv.WebServer.Controllers
             [FromQuery] decimal? maxPrice = null)
         {
             var user = await userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Index", "Home"); // Should be handled by Authorize but safety check
+            if (user == null) return RedirectToAction("Index", "Home");
 
             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, null, true, user.Id, offset, limit);
 
@@ -108,9 +108,56 @@ namespace Gauniv.WebServer.Controllers
         {
             var game = await gameService.GetGameByIdAsync(id);
             if (game == null) return NotFound();
+
+            var user = await userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var userGame = await applicationDbContext.Set<UserGame>()
+                    .FirstOrDefaultAsync(ug => ug.User.Id == user.Id && ug.Game.Id == id);
+                
+                if (userGame != null)
+                {
+                    ViewBag.IsOwned = true;
+                    ViewBag.PurchaseDate = userGame.PurchaseDate;
+                }
+                else
+                {
+                     ViewBag.IsOwned = false;
+                }
+            }
+            else
+            {
+                 ViewBag.IsOwned = false;
+            }
+
             return View(game);
         }
 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Buy(int id)
+        {
+             var user = await userManager.GetUserAsync(User);
+             if (user == null) return Challenge();
+
+             var success = await gameService.BuyGameAsync(id, user.Id);
+             if (success)
+             {
+                 return RedirectToAction("PurchaseSuccess", new { id = id });
+             }
+             
+             // Identify why it failed? (Already owned, etc.) for now just redirect to details with error?
+             // Or redirect to MyGames logic.
+             return RedirectToAction("Details", new { id = id }); 
+        }
+
+        [Authorize]
+        public async Task<IActionResult> PurchaseSuccess(int id)
+        {
+            var game = await gameService.GetGameByIdAsync(id);
+            if (game == null) return NotFound();
+            return View(game);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -94,6 +94,7 @@ builder.Services.AddHostedService<OnlineService>();
 builder.Services.AddHostedService<SetupService>();
 builder.Services.AddScoped<MappingProfile, MappingProfile>();
 builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<CategoryService>();
 
 var app = builder.Build();
 
