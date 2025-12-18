@@ -1,5 +1,8 @@
-﻿namespace Gauniv.WebServer.Data
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Gauniv.WebServer.Data
 {
+    [PrimaryKey(nameof(GameId), nameof(CategoryId))]
     public class GameCategory
     {
         public int GameId { get; set; }

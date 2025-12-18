@@ -14,19 +14,20 @@
     <div class="row">
         <!-- Left Column: Large Image -->
         <div class="col-md-5 mb-4">
-            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://placehold.co/600x800?text=No+Image" : Model.ImageUrl)" 
-                 class="img-fluid rounded shadow" 
-                 alt="@Model.Name" 
-                 style="width: 100%; object-fit: cover;">
+            <img
+                src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://placehold.co/600x800?text=No+Image" : Model.ImageUrl)"
+                class="img-fluid rounded shadow"
+                alt="@Model.Name"
+                style="width: 100%; object-fit: cover;">
         </div>
 
         <!-- Right Column: Info -->
         <div class="col-md-7">
             <h1>@Model.Name</h1>
             <p class="text-muted">Released on @Model.ReleaseDate.ToShortDateString()</p>
-            
+
             <div class="d-flex align-items-center mb-3">
-                <span class="badge bg-warning text-dark me-2">★ @(Model.Rating)/5</span>
+                <span class="badge bg-warning text-black me-2">★ @(Model.Rating)/5</span>
                 <span class="h3 mb-0 text-primary">@Model.Price.ToString("C")</span>
             </div>
 
@@ -37,6 +38,7 @@
                 @(string.IsNullOrEmpty(Model.Description) ? "No description available." : Model.Description)
             </p>
 
+
             <div class="mt-4">
                 <!-- Categories if available -->
                 @if (Model.GameCategories != null && Model.GameCategories.Any())
@@ -45,16 +47,30 @@
                         <strong>Categories:</strong>
                         @foreach (var cat in Model.GameCategories)
                         {
-                            <span class="badge bg-secondary me-1">@cat.CategoryId</span> 
-                            <!-- Assuming only CategoryId is directly available in association, 
-                                 need verification if GameCategory has navigation to Category. 
-                                 GameCategory usually links Game and Category. -->
+                            <span class="badge bg-secondary me-1">@cat.Title</span>
                         }
                     </div>
                 }
-                
-                <!-- Buy Button could go here -->
-                <button class="btn btn-success btn-lg" disabled title="Not implemented yet">Buy Now</button>
+
+                <hr/>
+
+                <!-- Ownership / Buy Logic -->
+                @if (ViewBag.IsOwned == true)
+                {
+                    <div class="alert alert-success mt-3">
+                        <h4 class="alert-heading">You own this game!</h4>
+                        <p class="mb-0">Purchased
+                            on: @(ViewBag.PurchaseDate?.ToLocalTime().ToString("g") ?? "Unknown date")</p>
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="Buy" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">
+                            Buy Now for @Model.Price.ToString("C")
+                        </button>
+                    </form>
+                }
             </div>
         </div>
     </div>

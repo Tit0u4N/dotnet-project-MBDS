@@ -38,7 +38,7 @@ public class GameService
     public async Task<GameFullDto?> UpdateGameAsync(int gameId, GameCreateOrEditDto gameDto)
     {
         ValidationHelper.Validate(gameDto);
-        var existingGame = await _context.Games.FindAsync(gameId);
+        var existingGame = await GetGameByIdAsync(gameId);
         if (existingGame == null) return null;
 
         gameDto.Adapt(existingGame);
@@ -48,9 +48,14 @@ public class GameService
     }
 
     public async Task<GameFullDto?> GetGameByIdAsync(int gameId)
-    {
-        var game = await _context.Games.FindAsync(gameId);
-        return game?.Adapt<GameFullDto>();
+    {  
+        var game = await _context.Games
+            .AsNoTracking()
+            .Include(g => g.GameCategories)
+            .ThenInclude(gc => gc.Category)
+            .FirstOrDefaultAsync(g => g.Id == gameId);
+        var g = game?.Adapt<Game, GameFullDto>();
+        return g;
     }
 
     public async Task<bool> BuyGameAsync(int gameId, string userId)

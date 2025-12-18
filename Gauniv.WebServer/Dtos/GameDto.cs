@@ -45,9 +45,8 @@ public class GameFullDto
     public string? ImageUrl { get; set; }
     public DateTime ReleaseDate { get; set; }
     public double Rating { get; set; }
-    public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
+    public ICollection<CategoryFullDto> GameCategories { get; set; }
 }
-
 
 public class GameCreateOrEditDto
 {

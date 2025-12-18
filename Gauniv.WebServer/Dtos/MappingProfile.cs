@@ -38,10 +38,14 @@ namespace Gauniv.WebServer.Dtos
     {
         public MappingProfile(ApplicationDbContext dbContext)
         {
-            TypeAdapterConfig<Game, GameFullDto>.NewConfig();
-            TypeAdapterConfig<GameFullDto, Game>.NewConfig();
-            TypeAdapterConfig<Game, GameCreateOrEditDto>.NewConfig();
-            TypeAdapterConfig<GameCreateOrEditDto, Game>.NewConfig();
+            TypeAdapterConfig<Game, GameFullDto>
+                .NewConfig()
+                .Map(dest => dest.GameCategories,
+                    src => src.GameCategories.Select(gc => gc.Category));
+            // TypeAdapterConfig<GameFullDto, Game>.NewConfig();
+            // TypeAdapterConfig<Game, GameCreateOrEditDto>.NewConfig();
+            // TypeAdapterConfig<GameCreateOrEditDto, Game>.NewConfig();
+            TypeAdapterConfig<Category, CategoryFullDto>.NewConfig();
         }
     }
 }
