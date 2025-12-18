@@ -1,0 +1,17 @@
+@model Gauniv.WebServer.Dtos.GameCreateOrEditDto
+@{
+    ViewData["Title"] = "New Game";
+}
+
+<div class="container mt-4">
+    <h1>Create New Game</h1>
+    <hr />
+    <form asp-action="CreateGame" method="post">
+        <partial name="GameForm" model="Model" />
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Create Game</button>
+            <a asp-action="Shop" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

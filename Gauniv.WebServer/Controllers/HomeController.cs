@@ -34,8 +34,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using CommunityToolkit.HighPerformance;
 using Gauniv.WebServer.Data;
+using Gauniv.WebServer.Dtos;
 using Gauniv.WebServer.Models;
 using Gauniv.WebServer.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -49,13 +51,16 @@ namespace Gauniv.WebServer.Controllers
         ILogger<HomeController> logger,
         ApplicationDbContext applicationDbContext,
         UserManager<User> userManager,
-        GameService gameService
+        GameService gameService,
+        CategoryService categoryService,
+        MappingProfile mappingProfile
         ) : Controller
     {
         private readonly ILogger<HomeController> _logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly UserManager<User> userManager = userManager;
         private readonly GameService gameService = gameService;
+        private readonly CategoryService categoryService = categoryService;
 
         public IActionResult Index()
         {
@@ -163,6 +168,60 @@ namespace Gauniv.WebServer.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> NewGame()
+        {
+            ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+            return View(new GameCreateOrEditDto());
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> CreateGame(GameCreateOrEditDto game)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+                return View("NewGame", game);
+            }
+            
+            await gameService.AddGameAsync(game);
+            return RedirectToAction("Shop");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> EditGame(int id)
+        {
+            var game = await gameService.GetGameByIdAsync(id);
+            if (game == null) return NotFound();
+
+            var dto = game.Adapt<GameCreateOrEditDto>();
+            // Manually map categories titles
+            dto.Categories = game.GameCategories?.Select(gc => gc.Title).ToList() ?? new List<string>();
+            
+            ViewBag.GameId = id;
+            ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+            return View(dto);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateGame(int id, GameCreateOrEditDto game)
+        {
+            if (!ModelState.IsValid) 
+            {
+                ViewBag.GameId = id;
+                ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+                return View("EditGame", game);
+            }
+
+            var result = await gameService.UpdateGameAsync(id, game);
+            if (result == null) return NotFound();
+            
+            return RedirectToAction("Details", new { id = id });
         }
     }
 }

@@ -19,6 +19,24 @@ public class GameService
         ValidationHelper.Validate(gameDto);
         Game gameDB = gameDto.Adapt<Game>();
         
+        // Ensure ReleaseDate is UTC for PostgreSQL
+        if (gameDB.ReleaseDate.Kind == DateTimeKind.Unspecified)
+        {
+            gameDB.ReleaseDate = DateTime.SpecifyKind(gameDB.ReleaseDate, DateTimeKind.Utc);
+        }
+
+        if (gameDto.Categories != null)
+        {
+            foreach (var categoryName in gameDto.Categories)
+            {
+                var category = await _context.Set<Category>().FirstOrDefaultAsync(c => c.Title == categoryName);
+                if (category != null)
+                {
+                    gameDB.GameCategories.Add(new GameCategory { Category = category });
+                }
+            }
+        }
+        
         var gameDBReturn = _context.Games.Add(gameDB);
         await _context.SaveChangesAsync();
 
@@ -38,10 +56,37 @@ public class GameService
     public async Task<GameFullDto?> UpdateGameAsync(int gameId, GameCreateOrEditDto gameDto)
     {
         ValidationHelper.Validate(gameDto);
-        var existingGame = await GetGameByIdAsync(gameId);
+        var existingGame = await _context.Games
+            .Include(g => g.GameCategories)
+            .ThenInclude(gc => gc.Category)
+            .FirstOrDefaultAsync(g => g.Id == gameId);
+            
         if (existingGame == null) return null;
 
         gameDto.Adapt(existingGame);
+        
+        // Ensure ReleaseDate is UTC for PostgreSQL
+        if (existingGame.ReleaseDate.Kind == DateTimeKind.Unspecified)
+        {
+            existingGame.ReleaseDate = DateTime.SpecifyKind(existingGame.ReleaseDate, DateTimeKind.Utc);
+        }
+
+        // Update Categories
+        if (gameDto.Categories != null)
+        {
+            // Remove existing categories that are not in the new list (or just clear all?)
+            // Clearing all and re-adding is safer/easier for full replacement
+            existingGame.GameCategories.Clear();
+
+            foreach (var categoryName in gameDto.Categories)
+            {
+                var category = await _context.Set<Category>().FirstOrDefaultAsync(c => c.Title == categoryName);
+                if (category != null)
+                {
+                    existingGame.GameCategories.Add(new GameCategory { Category = category });
+                }
+            }
+        }
 
         await _context.SaveChangesAsync();
         return existingGame.Adapt<GameFullDto>();
