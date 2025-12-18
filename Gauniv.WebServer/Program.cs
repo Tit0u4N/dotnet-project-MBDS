@@ -93,6 +93,7 @@ builder.Services.AddSignalR();
 builder.Services.AddHostedService<OnlineService>();
 builder.Services.AddHostedService<SetupService>();
 builder.Services.AddScoped<MappingProfile, MappingProfile>();
+builder.Services.AddScoped<GameService>();
 
 var app = builder.Build();
 

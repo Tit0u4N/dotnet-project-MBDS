@@ -42,8 +42,8 @@ a:hover {
   font-weight: bold;
   text-transform: uppercase;
   font-size: 14px;
-  
-  > span {
+
+  >span {
     font-size: 10px !important;
     margin-left: 2px;
   }
@@ -129,7 +129,7 @@ a:hover {
   border-top: 1px solid var(--steam-border);
   color: #8f98a0;
   padding: 20px 0;
-  position: relative;
+  position: relative !important;
   /* Changing from absolute to let it flow naturally if content is long */
   width: 100%;
 }
@@ -165,4 +165,36 @@ main {
   padding: 20px;
   border-radius: 4px;
   margin-top: 20px;
+}
+
+/* Pagination Overrides */
+.page-link {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-color: var(--steam-border);
+  color: var(--steam-text-light);
+}
+
+.page-link:hover {
+  background-color: var(--steam-border);
+  border-color: var(--steam-text-highlight);
+  color: #fff;
+}
+
+.page-item.disabled .page-link {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-color: var(--steam-border);
+  color: #666;
+}
+
+.page-item.active .page-link {
+  background-color: var(--steam-btn-gradient-bottom);
+  border-color: var(--steam-btn-gradient-top);
+  color: #fff;
+}
+
+/* Filter Box Custom Style */
+.steam-filter-box {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--steam-border) !important;
+  color: var(--steam-text-light);
 }

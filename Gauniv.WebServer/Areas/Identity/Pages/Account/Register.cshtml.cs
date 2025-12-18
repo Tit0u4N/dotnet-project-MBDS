@@ -31,13 +31,15 @@ namespace Gauniv.WebServer.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -45,6 +47,7 @@ namespace Gauniv.WebServer.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -99,6 +102,9 @@ namespace Gauniv.WebServer.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Display(Name = "Is Admin")]
+            public bool IsAdmin { get; set; }
         }
 
 
@@ -123,6 +129,15 @@ namespace Gauniv.WebServer.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    if (Input.IsAdmin)
+                    {
+                        if (!await _roleManager.RoleExistsAsync("Admin"))
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                        }
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

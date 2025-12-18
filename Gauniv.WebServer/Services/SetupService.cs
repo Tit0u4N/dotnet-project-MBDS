@@ -64,10 +64,10 @@ namespace Gauniv.WebServer.Services
                 var r = userSignInManager?.CreateAsync(new User()
                 {
                     UserName = "test@test.com",
-                    Email = "test@test.com",
-                    EmailConfirmed = true,
+                    LastName = "test",
                     FirstName = "test",
-                    LastName = "test"
+                    Email = "test@test.com",
+                    EmailConfirmed = true
                 }, "password").Result;
 
                 

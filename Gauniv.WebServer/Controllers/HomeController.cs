@@ -1,4 +1,5 @@
 #region Header
+
 // Cyril Tisserand
 // Projet Gauniv - WebServer
 // Gauniv 2025
@@ -25,13 +26,16 @@
 // use or other dealings in this Software without prior written authorization from the  Sophia-Antipolis University.
 // 
 // Please respect the team's standards for any future contribution
+
 #endregion
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using CommunityToolkit.HighPerformance;
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Models;
+using Gauniv.WebServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,21 +45,70 @@ using X.PagedList.Extensions;
 
 namespace Gauniv.WebServer.Controllers
 {
-    public class HomeController(ILogger<HomeController> logger, ApplicationDbContext applicationDbContext, UserManager<User> userManager) : Controller
+    public class HomeController(
+        ILogger<HomeController> logger,
+        ApplicationDbContext applicationDbContext,
+        UserManager<User> userManager,
+        GameService gameService
+        ) : Controller
     {
         private readonly ILogger<HomeController> _logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly UserManager<User> userManager = userManager;
+        private readonly GameService gameService = gameService;
 
         public IActionResult Index()
         {
-            return View(new List<Game> { new() { Id = 0 } });
+            return RedirectToAction("Games");
+        }
+
+        public async Task<IActionResult> Games(
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
+            [FromQuery] string? name = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null)
+        {
+             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, null, null, null, offset, limit);
+             
+             ViewBag.Total = total;
+             ViewBag.Offset = offset;
+             ViewBag.Limit = limit;
+             ViewBag.Name = name;
+             ViewBag.MinPrice = minPrice;
+             ViewBag.MaxPrice = maxPrice;
+
+             return View(games);
         }
 
         [Authorize]
-        public IActionResult MyGame()
+        public async Task<IActionResult> MyGame(
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
+            [FromQuery] string? name = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null)
         {
-            return View();
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Index", "Home"); // Should be handled by Authorize but safety check
+
+            var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, null, true, user.Id, offset, limit);
+
+            ViewBag.Total = total;
+            ViewBag.Offset = offset;
+            ViewBag.Limit = limit;
+            ViewBag.Name = name;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
+            return View(games);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var game = await gameService.GetGameByIdAsync(id);
+            if (game == null) return NotFound();
+            return View(game);
         }
 
 

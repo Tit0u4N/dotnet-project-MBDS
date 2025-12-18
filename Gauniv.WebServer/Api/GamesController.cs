@@ -28,6 +28,7 @@
 #endregion
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Dtos;
+using Gauniv.WebServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -43,13 +44,81 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gauniv.WebServer.Api
 {
-    [Route("api/1.0.0/[controller]/[action]")]
+    [Route("game")]
     [ApiController]
-    public class GamesController(ApplicationDbContext appDbContext, IMapper mapper, UserManager<User> userManager, MappingProfile mp) : ControllerBase
+    public class GamesController(GameService gameService, UserManager<User> userManager) : ControllerBase
     {
-        private readonly ApplicationDbContext appDbContext = appDbContext;
-        private readonly IMapper mapper = mapper;
-        private readonly UserManager<User> userManager = userManager;
-        private readonly MappingProfile mp = mp;
+        private readonly GameService _gameService = gameService;
+        private readonly UserManager<User> _userManager = userManager;
+
+        [HttpPost]
+        public async Task<ActionResult<GameFullDto>> AddGame(GameCreateOrEditDto game)
+        {
+            var createdGame = await _gameService.AddGameAsync(game);
+            return CreatedAtAction(nameof(GetAllGames), new { id = createdGame.Id }, createdGame);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            var result = await _gameService.DeleteGameAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<GameFullDto>> UpdateGame(int id, GameCreateOrEditDto game)
+        {
+            var updatedGame = await _gameService.UpdateGameAsync(id, game);
+            if (updatedGame == null) return NotFound();
+            return Ok(updatedGame);
+        }
+
+        [HttpPost("{id}/buy")]
+        [Authorize] 
+        public async Task<IActionResult> BuyGame(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var success = await _gameService.BuyGameAsync(id, user.Id);
+            if (!success) return BadRequest("Unable to purchase game. It might not exist or you already own it.");
+            
+            return Ok();
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllGames(
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 10,
+            [FromQuery] string? name = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] int[]? category = null,
+            [FromQuery] bool? owned = null)
+        {
+            string? userId = null;
+            if (owned.HasValue)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                userId = user?.Id;
+                // If filtering by owned but not logged in, deciding to return empty or error?
+                // Assuming public API might ignore owned filter if not logged in, or treat as false.
+                // But for strict filtering, we pass userId if available.
+            }
+
+            var (games, total) = await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
+            
+            var totalPages = limit > 0 ? (int)Math.Ceiling(total / (double)limit) : 0;
+            
+            return Ok(new 
+            {
+                Total = total,
+                TotalPages = totalPages,
+                Offset = offset,
+                Limit = limit,
+                Results = games
+            });
+        }
     }
 }
