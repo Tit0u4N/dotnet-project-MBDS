@@ -79,7 +79,7 @@ namespace Gauniv.Client.ViewModel
                 IsLoading = true;
                 ErrorMessage = null;
 
-                var offset = PageIndex;
+                var offset = PageIndex * PageSize;
                 // si SearchQuery vide, envoyer null pour ne pas filtrer
                 var name = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery;
 
@@ -93,11 +93,8 @@ namespace Gauniv.Client.ViewModel
                 await MainThread.InvokeOnMainThreadAsync(() =>{
                     Games.Clear();
                     foreach (var g in dto.Results)
-                    {
                         Games.Add(g);
-                        Console.WriteLine(g.Name);
-                        Console.WriteLine(g.Price);
-                    }
+                    
                 });
             }
             catch (Exception ex)
@@ -154,7 +151,6 @@ namespace Gauniv.Client.ViewModel
         private void OpenDetails(object parameter)
         {
             GameFullDto? game = null;
-            Console.WriteLine(game);
             if (parameter is SelectionChangedEventArgs sce)
             {
                 game = sce.CurrentSelection?.FirstOrDefault() as GameFullDto;
@@ -163,6 +159,7 @@ namespace Gauniv.Client.ViewModel
             {
                 game = g;
             }
+            Console.WriteLine(game);
 
             if (game == null) return;
             var args = new Dictionary<string, object>

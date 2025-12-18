@@ -36,41 +36,65 @@ Please respect the team's standards for any future contribution
              x:DataType="vm:IndexViewModel"
              BindingContext="{vm:IndexViewModel}">
 
-    <VerticalStackLayout Padding="12">
-        <!-- Header: Search + page size picker -->
-        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-            <SearchBar Placeholder="Rechercher un jeu" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" />
+    <!-- Remplacement de la VerticalStackLayout par une Grid pour contraindre la taille du CollectionView -->
+    <Grid Padding="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header: recherche + picker -->
+            <RowDefinition Height="Auto" /> <!-- Loading + erreur -->
+            <RowDefinition Height="*" />    <!-- CollectionView: prend l'espace restant -->
+            <RowDefinition Height="Auto" /> <!-- Pagination -->
+        </Grid.RowDefinitions>
 
-            <Picker Title="Par page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" />
-        </HorizontalStackLayout>
+        <!-- Header: Search + page size picker -->
+        <Grid Grid.Row="0" VerticalOptions="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Logo centré -->
+            <Image Source="logo_vapeur_big.png" Grid.Column="1" HeightRequest="80" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" />
+
+            <!-- SearchBar et Picker collés à droite -->
+            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
+                <SearchBar Placeholder="Rechercher un jeu" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
+
+            </HorizontalStackLayout>
+        </Grid>
 
         <!-- Loading indicator and error -->
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
-        <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
-        <Label Text="{Binding Games.Count}" />
-        <!-- Games grid -->
-        <CollectionView ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChangedCommand="{Binding OpenDetailsCommand}">
-            <!-- <CollectionView.ItemsLayout> -->
-            <!--     <GridItemsLayout Orientation="Vertical" Span="4" /> -->
-            <!-- </CollectionView.ItemsLayout> -->
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="proxy:GameFullDto">
-                        <VerticalStackLayout>
-                            <!-- <Image Source="{Binding ImageUrl}" Aspect="AspectFill" HeightRequest="200" MaximumWidthRequest="150"/> -->
-                            <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" />
-                            <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
-                        </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <VerticalStackLayout Grid.Row="1">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+            <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
+        </VerticalStackLayout>
+        <!-- Games grid: occupe l'espace restant et est scrollable -->
+        <Grid Grid.Row="2">
+            <!-- CollectionView principal -->
+            <CollectionView x:Name="GamesCollection" ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChangedCommand="{Binding OpenDetailsCommand}" MaximumWidthRequest="1100" VerticalOptions="FillAndExpand">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"  />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="proxy:GameFullDto">
+                            <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8">
+                                <Image Source="{Binding ImageUrl}"  HeightRequest="200" MaximumWidthRequest="150" Aspect="AspectFit" Margin="4"/>
+                                <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
+                            </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
 
         <!-- Pagination controls -->
-        <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand">
-            <Button Text="Précédent" Command="{Binding PrevPageCommand}" />
+        <HorizontalStackLayout Grid.Row="3" Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand" Margin="0,12,0,0">
+            <Button Text="Précédent" Command="{Binding PrevPageCommand}" HeightRequest="36" VerticalOptions="Center" />
             <Label Text="{Binding CurrentPageDisplay, StringFormat='Page {0}'}" VerticalOptions="Center" />
             <Label Text="/" VerticalOptions="Center" />
             <Label Text="{Binding TotalPages}" VerticalOptions="Center" />
-            <Button Text="Suivant" Command="{Binding NextPageCommand}" />
+            <Button Text="Suivant" Command="{Binding NextPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+            <Picker Title="Par page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" VerticalOptions="Center" />
         </HorizontalStackLayout>
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>
