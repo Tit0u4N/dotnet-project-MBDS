@@ -1,9 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Gauniv.Client.Pages;
 using Gauniv.Client.Services;
 
 namespace Gauniv.Client.ViewModel;
-using System.ComponentModel;
+
 using System.Windows.Input;
 using Index = Gauniv.Client.Pages.Index;
 
