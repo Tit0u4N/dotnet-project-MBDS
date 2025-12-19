@@ -34,6 +34,7 @@ using Gauniv.WebServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gauniv.WebServer.Api
 {
@@ -42,6 +43,7 @@ namespace Gauniv.WebServer.Api
     public class GamesController(
         GameService gameService,
         UserManager<User> userManager,
+        ApplicationDbContext applicationDbContext,
         MappingProfile mappingProfile) : ControllerBase
     {
         [HttpPost("{id}/buy")]
@@ -58,10 +60,27 @@ namespace Gauniv.WebServer.Api
         }
 
         [HttpGet("details/{id}")]
-        public async Task<IActionResult> GetGameById([FromRoute] int id)
+        public async Task<ActionResult<OwnedGameFullDto>> GetGameById([FromRoute] int id)
         {
             var game = await gameService.GetGameByIdAsync(id);
             if (game == null) return NotFound();
+            
+            var newGame = new OwnedGameFullDto(game);
+            
+            var user = await userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var userGame = await applicationDbContext.Set<UserGame>().FirstOrDefaultAsync(ug => ug.User.Id == user.Id && ug.Game.Id == id);
+                if (userGame != null)
+                {
+                    newGame.IsOwned = true;
+                    newGame.PurchaseDate = userGame.PurchaseDate;
+                }
+                else
+                {
+                    newGame.IsOwned = false;
+                }
+            }
             return Ok(game);
         }
 

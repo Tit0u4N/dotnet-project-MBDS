@@ -48,6 +48,28 @@ public class GameFullDto
     public ICollection<CategoryFullDto> GameCategories { get; set; }
 }
 
+public class OwnedGameFullDto : GameFullDto
+{
+    public Boolean IsOwned { get; set; }
+    public DateTime? PurchaseDate { get; set; }
+    
+    public OwnedGameFullDto(GameFullDto game)
+    {
+        Id = game.Id;
+        Name = game.Name;
+        Description = game.Description;
+        Price = game.Price;
+        ImageUrl = game.ImageUrl;
+        ReleaseDate = game.ReleaseDate;
+        Rating = game.Rating;
+        Developer = game.Developer;
+        Publisher = game.Publisher;
+        SizeInMB = game.SizeInMB;
+        MaxPlayersConnectedSimultaneously = game.MaxPlayersConnectedSimultaneously;
+        GameCategories = game.GameCategories;
+    }
+}
+
 public class GameCreateOrEditDto
 {
     [Required(ErrorMessage = "Name is required.")]

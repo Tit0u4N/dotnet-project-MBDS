@@ -28,6 +28,8 @@
 #endregion
 
 
+using Gauniv.Client.Services;
+
 namespace Gauniv.Client
 {
     public partial class AppShell : Shell

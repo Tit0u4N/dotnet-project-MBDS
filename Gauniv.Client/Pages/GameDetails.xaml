@@ -30,17 +30,78 @@ Please respect the team's standards for any future contribution
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Gauniv.Client.Pages.GameDetails"
              Title="GameDetails"
              BindingContext="{vm:GameDetailsViewModel}"
              x:DataType="vm:GameDetailsViewModel">
-    <ScrollView>
-        <VerticalStackLayout Padding="12" Spacing="8">
-            <Label Text="Game details" FontAttributes="Bold" />
-            <Label Text="Paramètres reçus:" />
-            <Label Text="{Binding ArgsDisplay}" LineBreakMode="WordWrap" />
-        </VerticalStackLayout>
+
+    <ScrollView IsVisible="{Binding Game}">
+        <Grid>
+            <Grid
+                IsVisible="{Binding IsLoading}"
+                ZIndex="300"
+                BackgroundColor="#50000000">
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+            </Grid>
+            <Grid Padding="12" 
+                  ColumnDefinitions="Auto,*" 
+                  RowDefinitions="Auto" 
+                  HorizontalOptions="Center" 
+                  VerticalOptions="Center"
+                  BackgroundColor="{StaticResource CardBackground}">
+                  
+                <!-- Image à gauche -->
+                <Border Grid.Column="0" Padding="0" Stroke="#ddd" WidthRequest="325" HeightRequest="455" StrokeThickness="1">
+                    <Image Source="{Binding Game.ImageUrl, FallbackValue='https://placehold.co/300x400?text=No+Image'}"
+                           Aspect="AspectFill"
+                           WidthRequest="320"
+                           HeightRequest="450"
+                           />
+                </Border>
+
+                <!-- Détails à droite -->
+                <VerticalStackLayout Grid.Column="1" Padding="12" Spacing="12">
+                    <Label Text="{Binding Game.Name}" FontAttributes="Bold" FontSize="20" LineBreakMode="TailTruncation" />
+                    <Label Text="{Binding Game.Price, StringFormat='{0:C}'}" FontAttributes="Bold" TextColor="{DynamicResource TextHighlight}" IsVisible="{Binding !Game.IsOwned}" />
+
+                    <Label Text="Description" FontAttributes="Bold" />
+                    <Label Text="{Binding Game.Description}" LineBreakMode="WordWrap" />
+
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Label Text="Release:" FontAttributes="Bold" />
+                        <Label Text="{Binding Game.ReleaseDate, StringFormat='{0:yyyy-MM-dd}'}" />
+
+                        <Label Text="Rating:" FontAttributes="Bold" Margin="12,0,0,0"/>
+                        <Label Text="{Binding Game.Rating}" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Label Text="Developer:" FontAttributes="Bold" />
+                        <Label Text="{Binding Game.Developer}" />
+
+                        <Label Text="Publisher:" FontAttributes="Bold" Margin="12,0,0,0" />
+                        <Label Text="{Binding Game.Publisher}" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="Size" FontAttributes="Bold" />
+                    <Label Text="{Binding Game.SizeInMB, StringFormat='{0} MB'}" />
+
+                    <!-- Date d'achat si possédé -->
+                    <Label Text="{Binding Game.PurchaseDate, StringFormat='Purchased on {0:yyyy-MM-dd}'}"
+                           IsVisible="{Binding Game.IsOwned}" TextColor="Gray" />
+
+                    <!-- Boutons Buy/Download -->
+                    <HorizontalStackLayout Spacing="12" Margin="0,8,0,0" IsVisible="{Binding IsConnected}">
+                        <Button Text="{Binding BuyButtonText}"
+                                Command="{Binding BuyOrDownloadCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"/>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
     </ScrollView>
 </ContentPage>
 

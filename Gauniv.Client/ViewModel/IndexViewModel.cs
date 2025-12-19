@@ -120,7 +120,7 @@ namespace Gauniv.Client.ViewModel
                 try
                 {
                     // Naviguer vers la page de détails
-                    var args = new Dictionary<string, object> { { "game", value } };
+                    var args = new Dictionary<string, object> { { "gameId", value.Id.ToString()} };
                     NavigationService.Instance.Navigate<GameDetails>(args);
                 }
                 catch (Exception ex)

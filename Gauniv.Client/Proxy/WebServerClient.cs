@@ -659,7 +659,7 @@ namespace Gauniv.Client.Proxy
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task DetailsAsync(int id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public virtual async System.Threading.Tasks.Task<OwnedGameFullDto> DetailsAsync(int id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -671,6 +671,7 @@ namespace Gauniv.Client.Proxy
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
                     request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                     if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
@@ -703,7 +704,12 @@ namespace Gauniv.Client.Proxy
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            return;
+                            var objectResponse_ = await ReadObjectResponseAsync<OwnedGameFullDto>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
                         }
                         else
                         {
@@ -1042,6 +1048,14 @@ namespace Gauniv.Client.Proxy
         [System.Text.Json.Serialization.JsonPropertyName("publisher")]
         public string Publisher { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("sizeInMB")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)$")]
+        public int SizeInMB { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("maxPlayersConnectedSimultaneously")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)$")]
+        public int MaxPlayersConnectedSimultaneously { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("gameCategories")]
         public System.Collections.Generic.ICollection<CategoryFullDto> GameCategories { get; set; }
 
@@ -1073,6 +1087,68 @@ namespace Gauniv.Client.Proxy
 
         [System.Text.Json.Serialization.JsonPropertyName("twoFactorRecoveryCode")]
         public string TwoFactorRecoveryCode { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class OwnedGameFullDto
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("isOwned")]
+        public bool IsOwned { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("purchaseDate")]
+        public System.DateTimeOffset? PurchaseDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)$")]
+        public int Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("price")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)(?:\.\d+)?$")]
+        public double Price { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("imageUrl")]
+        public string ImageUrl { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("releaseDate")]
+        public System.DateTimeOffset ReleaseDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("rating")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$")]
+        public double Rating { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("developer")]
+        public string Developer { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("publisher")]
+        public string Publisher { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sizeInMB")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)$")]
+        public int SizeInMB { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("maxPlayersConnectedSimultaneously")]
+        [System.ComponentModel.DataAnnotations.RegularExpression(@"^-?(?:0|[1-9]\d*)$")]
+        public int MaxPlayersConnectedSimultaneously { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("gameCategories")]
+        public System.Collections.Generic.ICollection<CategoryFullDto> GameCategories { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
