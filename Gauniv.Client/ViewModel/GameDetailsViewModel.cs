@@ -13,13 +13,14 @@ namespace Gauniv.Client.ViewModel
         private OwnedGameFullDto? game = null;
         
         [ObservableProperty]
-        private string buyButtonText = "Buy";
-        
-        [ObservableProperty]
         private bool isLoading = false;
 
-        public IAsyncRelayCommand? BuyOrDownloadCommand { get; private set; }
+        [ObservableProperty]
+        private bool isBuyButtonEnabled = true;
 
+        [ObservableProperty]
+        private bool isNotOwned = true;
+        
         [ObservableProperty] 
         private string? gameId;
         
@@ -28,7 +29,6 @@ namespace Gauniv.Client.ViewModel
 
         public GameDetailsViewModel()
         {
-            BuyOrDownloadCommand = new AsyncRelayCommand(ExecuteBuyOrDownloadAsync);
 
         }
         
@@ -42,7 +42,7 @@ namespace Gauniv.Client.ViewModel
             var id = Int32.Parse(GameId);
             var gameDetails = await NetworkService.Instance.GamesClient.DetailsAsync(id);
             Game = gameDetails;
-            UpdateButtonText();
+            IsNotOwned = !(gameDetails?.IsOwned ?? false);
             IsLoading = false;
         }
         
@@ -52,40 +52,31 @@ namespace Gauniv.Client.ViewModel
             _ = LoadGameDetails();
         }
 
-        partial void OnGameChanged(OwnedGameFullDto? value)
-        {
-            // appelé automatiquement par ObservableProperty lorsque Game change
-            UpdateButtonText();
-        }
-
-        private void UpdateButtonText()
-        {
-            if(Game == null) return;
-            BuyButtonText = Game.IsOwned ? "Download" : "Buy";
-        }
-
-        private async Task ExecuteBuyOrDownloadAsync()
+        
+        
+        [RelayCommand]
+        public async Task Buy()
         {
             if (Game == null) return;
-            if (Game.IsOwned)
-            {
-                // logique de téléchargement (placeholder) : ouvrir un navigateur vers l'URL de téléchargement ou lancer la logique
-                // Pour l'instant on simule par un TODO ou log ; vous pouvez remplacer par l'appel approprié
-                System.Diagnostics.Debug.WriteLine($"Download requested for game {Game.Id}");
-                return;
-            }
-
             try
             {
+                IsBuyButtonEnabled = false;
                 // Appel à l'API pour acheter le jeu
                 await NetworkService.Instance.GamesClient.BuyAsync(Game.Id);
                 // Si l'appel réussit, rafraîchir les détails
+                // ajoute un wait de 10 seconds pour tester
+                await Task.Delay(10000);
+                
                 var refreshed = await NetworkService.Instance.GamesClient.DetailsAsync(Game.Id);
                 Game = refreshed;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Buy failed: {ex}");
+            }
+            finally
+            {
+                IsBuyButtonEnabled = true;
             }
         }
     }

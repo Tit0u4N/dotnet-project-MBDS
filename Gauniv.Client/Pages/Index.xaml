@@ -66,7 +66,7 @@ Please respect the team's standards for any future contribution
 
                 <!-- SearchBar et Picker collés à droite -->
                 <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
-                    <SearchBar Placeholder="Rechercher un jeu" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
+                    <SearchBar Placeholder="Search a game" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
 
                 </HorizontalStackLayout>
             </Grid>
@@ -100,7 +100,7 @@ Please respect the team's standards for any future contribution
                                     <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8">
                                         <Image Source="{Binding ImageUrl}"  HeightRequest="200" MaximumWidthRequest="150" Aspect="AspectFit" Margin="4"/>
                                         <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
+                                        <Label Text="{Binding Price, StringFormat='Price: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
                                     </VerticalStackLayout>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -117,21 +117,21 @@ Please respect the team's standards for any future contribution
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <!-- Min / Max price -->
-                    <HorizontalStackLayout Grid.Row="0" Spacing="2" HorizontalOptions="Center">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="8" HorizontalOptions="Center">
                         <VerticalStackLayout  Spacing="2" HorizontalOptions="Center">
-                            <Label Text="Prix min" FontSize="Micro" />
+                            <Label Text="Min price" FontSize="Micro" />
                             <!-- Bind directly to the numeric property; Numeric keyboard -->
                             <Entry Text="{Binding MinPriceString, Mode=TwoWay}" Placeholder="0.00" WidthRequest="100" Keyboard="Numeric" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
-                            <Label Text="Prix max" FontSize="Micro" />
+                            <Label Text="Max price" FontSize="Micro" />
                             <Entry Text="{Binding MaxPriceString, Mode=TwoWay}" Placeholder="0.00" WidthRequest="100" Keyboard="Numeric" />
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                         
                     <!-- Category multi-picker : CollectionView avec CheckBox -->
                     <VerticalStackLayout Grid.Row="1" Spacing="2">
-                        <Label Text="Catégories" FontAttributes="Bold" />
+                        <Label Text="Categories" FontAttributes="Bold" />
                         <CollectionView ItemsSource="{Binding Categories}" SelectionMode="None" HeightRequest="240" WidthRequest="220" Margin="0,8,0,8">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="proxy:CategoryDto">
@@ -154,7 +154,8 @@ Please respect the team's standards for any future contribution
 
             <!-- Pagination controls -->
             <HorizontalStackLayout Grid.Row="3" Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand" Margin="0,12,0,0">
-                <Button Text="Précédent" 
+                <Button Text="Previous" 
+                        IsEnabled="{Binding IsPrevPageEnabled}"
                         TextColor="{StaticResource TextLight}"
                         BackgroundColor="{StaticResource InputBackground}"
                         Command="{Binding PrevPageCommand}" HeightRequest="36" VerticalOptions="Center" />
@@ -163,9 +164,10 @@ Please respect the team's standards for any future contribution
                 <Label Text="{Binding TotalPages}" VerticalOptions="Center" />
                 <Button
                     TextColor="{StaticResource TextLight}"
+                    IsEnabled="{Binding IsNextPageEnabled}"
                     BackgroundColor="{StaticResource InputBackground}" 
-                    Text="Suivant" Command="{Binding NextPageCommand}" HeightRequest="36" VerticalOptions="Center" />
-                <Picker Title="Par page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" VerticalOptions="Center" />
+                    Text="Next" Command="{Binding NextPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+                <Picker Title="Per page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" VerticalOptions="Center" />
             </HorizontalStackLayout>
         </Grid>
     </Grid>

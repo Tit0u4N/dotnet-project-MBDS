@@ -81,7 +81,7 @@ namespace Gauniv.WebServer.Api
                     newGame.IsOwned = false;
                 }
             }
-            return Ok(game);
+            return Ok(newGame);
         }
 
         [HttpGet("all")]

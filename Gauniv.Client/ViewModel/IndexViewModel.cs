@@ -45,6 +45,12 @@ namespace Gauniv.Client.ViewModel
 
         [ObservableProperty]
         private bool isNotUpdating = false;
+        
+        [ObservableProperty]
+        private bool isPrevPageEnabled = true;
+        
+        [ObservableProperty]
+        private bool isNextPageEnabled = true;
 
         [ObservableProperty]
         private string? errorMessage;
@@ -142,7 +148,7 @@ namespace Gauniv.Client.ViewModel
             _suppressMinPriceSanitize = true;
 
             // Ne garder que chiffres, '.' ',' et '-' puis remplacer '.' par ',' (souhait de l'utilisateur)
-            var sanitized = cleanPriceString(value);
+            var sanitized = CleanPriceString(value);
 
             // Affecter directement le champ backing pour éviter de ré-appeler le setter auto-généré
             minPriceString = sanitized;
@@ -157,7 +163,7 @@ namespace Gauniv.Client.ViewModel
             if (_suppressMaxPriceSanitize) return;
             _suppressMaxPriceSanitize = true;
 
-            var sanitized = cleanPriceString(value);
+            var sanitized = CleanPriceString(value);
 
             maxPriceString = sanitized;
             OnPropertyChanged(nameof(MaxPriceString));
@@ -165,7 +171,7 @@ namespace Gauniv.Client.ViewModel
             _suppressMaxPriceSanitize = false;
         }
 
-        private string cleanPriceString(string? s, bool forceToCorrect = false)
+        private string CleanPriceString(string? s, bool forceToCorrect = false)
         {
             if (string.IsNullOrWhiteSpace(s)) return string.Empty;
             var cleaned = new string((s ?? string.Empty).Where(c =>  c == '.' || c == ',' || char.IsDigit(c) ).ToArray());
@@ -200,7 +206,7 @@ namespace Gauniv.Client.ViewModel
         private double? ParsePrice(string? s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
-            var cleaned = cleanPriceString(s, true);
+            var cleaned = CleanPriceString(s, true);
 
             if (double.TryParse(cleaned, NumberStyles.Float, CultureInfo.InvariantCulture, out double v))
                 return v;
@@ -230,6 +236,9 @@ namespace Gauniv.Client.ViewModel
 
                 TotalItems = dto.Total;
                 TotalPages = dto.TotalPages;
+                
+                IsPrevPageEnabled = PageIndex > 0;
+                IsNextPageEnabled = PageIndex < TotalPages - 1;
                 
                 var newGames = new ObservableCollection<GameFullDto>(dto.Results?.ToList()) ?? new ObservableCollection<GameFullDto>();
                 

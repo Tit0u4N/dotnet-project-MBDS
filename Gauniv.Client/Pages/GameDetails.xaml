@@ -92,16 +92,30 @@ Please respect the team's standards for any future contribution
 
                     <!-- Boutons Buy/Download -->
                     <HorizontalStackLayout Spacing="12" Margin="0,8,0,0" IsVisible="{Binding IsConnected}">
-                        <Button Text="{Binding BuyButtonText}"
-                                Command="{Binding BuyOrDownloadCommand}"
+                        <Button x:Name="BuyButton" Text="Buy"
+                                Command="{Binding BuyCommand}"
                                 TextColor="{StaticResource TextLight}"
                                 BackgroundColor="{StaticResource InputBackground}"
-                                HorizontalOptions="Start"/>
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsNotOwned}"
+                                IsEnabled="{Binding IsBuyButtonEnabled}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsEnabled, Source={x:Reference BuyButton}}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Gray" />
+                                    <Setter Property="TextColor" Value="LightGray" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Text="Download"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding Game.IsOwned}" />
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>
             </Grid>
         </Grid>
     </ScrollView>
-</ContentPage>
 
+</ContentPage>
