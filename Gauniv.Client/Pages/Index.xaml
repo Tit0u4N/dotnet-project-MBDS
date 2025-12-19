@@ -30,24 +30,71 @@ Please respect the team's standards for any future contribution
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:proxy="using:Gauniv.Client.Proxy"
              x:Class="Gauniv.Client.Pages.Index"
              Title="Index"
              x:DataType="vm:IndexViewModel"
              BindingContext="{vm:IndexViewModel}">
-    <!-- 
-            A vous de créer la liste avec le bon binding. Une <ListBox>, une <CollectionView> ou autre fera l'affaire 
-            La propriété ItemsSource doit pointé vers la propiété Books de votre dataContext actuelle 
-            Utilisé ListBox.ItemTemplate pour définir comment sont affiché vos items
-            <ListBox.ItemTemplate>
-        
-            A vous de faire afficher les champs que vous voulez afficher pour savoir quel sont les livre disponible
-            <xxx Text="{Binding MyPropertyOnMyObjectBook}"/>
-            N'oublier pas non plus de rajouter un boutton (ou une autre technique) quelque part pour allez voir les détails de votre livre
-            Les propriété Command et CommandParameter pourrons vous aider ! 
-            Command="{Binding DataContext.ItemSelectedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Page}}}" 
-            CommandParameter="{Binding .}"
-    -->
-    <Label Text="List des jeux" />
+
+    <!-- Remplacement de la VerticalStackLayout par une Grid pour contraindre la taille du CollectionView -->
+    <Grid Padding="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header: recherche + picker -->
+            <RowDefinition Height="Auto" /> <!-- Loading + erreur -->
+            <RowDefinition Height="*" />    <!-- CollectionView: prend l'espace restant -->
+            <RowDefinition Height="Auto" /> <!-- Pagination -->
+        </Grid.RowDefinitions>
+
+        <!-- Header: Search + page size picker -->
+        <Grid Grid.Row="0" VerticalOptions="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Logo centré -->
+            <Image Source="logo_vapeur_big.png" Grid.Column="1" HeightRequest="80" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" />
+
+            <!-- SearchBar et Picker collés à droite -->
+            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
+                <SearchBar Placeholder="Rechercher un jeu" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
+
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Loading indicator and error -->
+        <VerticalStackLayout Grid.Row="1">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+            <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
+        </VerticalStackLayout>
+        <!-- Games grid: occupe l'espace restant et est scrollable -->
+        <Grid Grid.Row="2">
+            <!-- CollectionView principal -->
+            <CollectionView x:Name="GamesCollection" ItemsSource="{Binding Games}" SelectionMode="Single" SelectedItem="{Binding SelectedGame, Mode=TwoWay}" MaximumWidthRequest="1100" VerticalOptions="FillAndExpand">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"  />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="proxy:GameFullDto">
+                            <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8">
+                                <Image Source="{Binding ImageUrl}"  HeightRequest="200" MaximumWidthRequest="150" Aspect="AspectFit" Margin="4"/>
+                                <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
+                            </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!-- Pagination controls -->
+        <HorizontalStackLayout Grid.Row="3" Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand" Margin="0,12,0,0">
+            <Button Text="Précédent" Command="{Binding PrevPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+            <Label Text="{Binding CurrentPageDisplay, StringFormat='Page {0}'}" VerticalOptions="Center" />
+            <Label Text="/" VerticalOptions="Center" />
+            <Label Text="{Binding TotalPages}" VerticalOptions="Center" />
+            <Button Text="Suivant" Command="{Binding NextPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+            <Picker Title="Par page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+    </Grid>
 </ContentPage>
