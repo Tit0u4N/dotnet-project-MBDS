@@ -136,7 +136,9 @@ public class GameService
         bool? owned = null,
         string? userId = null, // Required for 'owned' filter
         int offset = 0,
-        int limit = 10)
+        int limit = 10,
+        int? minSizeMb = null,
+        int? maxSizeMb = null)
     {
         var query = _context.Games
             .AsNoTracking()
@@ -160,6 +162,16 @@ public class GameService
             query = query.Where(g => g.Price <= maxPrice.Value);
         }
 
+        // Filter by Size (in MB)
+        if (minSizeMb.HasValue)
+        {
+            query = query.Where(g => g.SizeInMB >= minSizeMb.Value);
+        }
+        if (maxSizeMb.HasValue)
+        {
+            query = query.Where(g => g.SizeInMB <= maxSizeMb.Value);
+        }
+
         // Filter by Category
         if (categoryIds != null && categoryIds.Length > 0)
         {
@@ -181,7 +193,7 @@ public class GameService
                 query = query.Where(g => !g.UserGames.Any(ug => ug.UserId == userId));
             }
         }
-        
+
         var totalCount = await query.CountAsync();
 
         query = query

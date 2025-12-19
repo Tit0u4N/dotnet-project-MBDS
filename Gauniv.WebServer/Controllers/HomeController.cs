@@ -83,16 +83,20 @@ namespace Gauniv.WebServer.Controllers
             [FromQuery] string? name = null,
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
-            [FromQuery(Name = "category")] int[]? category = null)
+            [FromQuery(Name = "category")] int[]? category = null,
+            [FromQuery] int? minSizeMb = null,
+            [FromQuery] int? maxSizeMb = null)
         {
-             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, null, null, offset, limit);
-             
+             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, null, null, offset, limit, minSizeMb, maxSizeMb);
+
              ViewBag.Total = total;
              ViewBag.Offset = offset;
              ViewBag.Limit = limit;
              ViewBag.Name = name;
              ViewBag.MinPrice = minPrice;
              ViewBag.MaxPrice = maxPrice;
+             ViewBag.MinSizeMb = minSizeMb;
+             ViewBag.MaxSizeMb = maxSizeMb;
              ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
              ViewBag.SelectedCategories = category ?? Array.Empty<int>();
 
@@ -106,12 +110,14 @@ namespace Gauniv.WebServer.Controllers
             [FromQuery] string? name = null,
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
-            [FromQuery(Name = "category")] int[]? category = null)
+            [FromQuery(Name = "category")] int[]? category = null,
+            [FromQuery] int? minSizeMb = null,
+            [FromQuery] int? maxSizeMb = null)
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Index", "Home");
 
-            var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, true, user.Id, offset, limit);
+            var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, true, user.Id, offset, limit, minSizeMb, maxSizeMb);
 
             ViewBag.Total = total;
             ViewBag.Offset = offset;
@@ -119,6 +125,8 @@ namespace Gauniv.WebServer.Controllers
             ViewBag.Name = name;
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
+            ViewBag.MinSizeMb = minSizeMb;
+            ViewBag.MaxSizeMb = maxSizeMb;
             ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
             ViewBag.SelectedCategories = category ?? Array.Empty<int>();
 
