@@ -33,14 +33,13 @@ using Gauniv.WebServer.Services;
 using Gauniv.WebServer.Websocket;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
+using Microsoft.AspNetCore.Http.Features;
 
 
 // Set the culture so that the culture is the same between front and back
@@ -51,6 +50,16 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = long.MaxValue;
+});
+
+// Configure Kestrel for large file uploads (up to 50 GB)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800000; // 50 GB
+});
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -95,6 +104,7 @@ builder.Services.AddHostedService<SetupService>();
 builder.Services.AddScoped<MappingProfile, MappingProfile>();
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<GameStorageService>();
 
 var app = builder.Build();
 

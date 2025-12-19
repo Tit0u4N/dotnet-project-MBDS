@@ -53,6 +53,7 @@ namespace Gauniv.WebServer.Controllers
         UserManager<User> userManager,
         GameService gameService,
         CategoryService categoryService,
+        GameStorageService gameStorageService,
         MappingProfile mappingProfile
         ) : Controller
     {
@@ -61,6 +62,7 @@ namespace Gauniv.WebServer.Controllers
         private readonly UserManager<User> userManager = userManager;
         private readonly GameService gameService = gameService;
         private readonly CategoryService categoryService = categoryService;
+        private readonly GameStorageService gameStorageService = gameStorageService;
 
         public IActionResult Index()
         {
@@ -185,6 +187,8 @@ namespace Gauniv.WebServer.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [RequestSizeLimit(52428800000)] // 50 GB
+        [RequestFormLimits(MultipartBodyLengthLimit = 52428800000)]
         public async Task<IActionResult> CreateGame(GameCreateOrEditDto game)
         {
             if (!ModelState.IsValid)
@@ -193,7 +197,40 @@ namespace Gauniv.WebServer.Controllers
                 return View("NewGame", game);
             }
             
-            await gameService.AddGameAsync(game);
+            // Create the game first to get the ID
+            var createdGame = await gameService.AddGameAsync(game);
+            
+            // Handle file upload if a file was provided
+            if (game.GameFile != null && game.GameFile.Length > 0)
+            {
+                var (success, sizeInMB, errorMessage) = await gameStorageService.SaveGameFileAsync(game.GameFile, createdGame.Id);
+                
+                if (!success)
+                {
+                    // Delete the game if file upload failed
+                    await gameService.DeleteGameAsync(createdGame.Id);
+                    ModelState.AddModelError("GameFile", errorMessage ?? "Erreur lors de l'upload du fichier");
+                    ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+                    return View("NewGame", game);
+                }
+                
+                // Update the game with the file size
+                var updateDto = new GameCreateOrEditDto
+                {
+                    Name = game.Name,
+                    Description = game.Description,
+                    Price = game.Price,
+                    ImageUrl = game.ImageUrl,
+                    ReleaseDate = game.ReleaseDate,
+                    Rating = game.Rating,
+                    Developer = game.Developer,
+                    Publisher = game.Publisher,
+                    Categories = game.Categories,
+                    SizeInMB = sizeInMB
+                };
+                await gameService.UpdateGameAsync(createdGame.Id, updateDto);
+            }
+            
             return RedirectToAction("Shop");
         }
 
@@ -210,24 +247,68 @@ namespace Gauniv.WebServer.Controllers
             
             ViewBag.GameId = id;
             ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+            ViewBag.CurrentFileSize = game.SizeInMB;
             return View(dto);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [RequestSizeLimit(52428800000)] // 50 GB
+        [RequestFormLimits(MultipartBodyLengthLimit = 52428800000)]
         public async Task<IActionResult> UpdateGame(int id, GameCreateOrEditDto game)
         {
             if (!ModelState.IsValid) 
             {
                 ViewBag.GameId = id;
                 ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+                ViewBag.CurrentFileSize = gameStorageService.GetGameFileSizeInMB(id);
                 return View("EditGame", game);
+            }
+
+            // Handle file upload if a file was provided
+            if (game.GameFile != null && game.GameFile.Length > 0)
+            {
+                var (success, sizeInMB, errorMessage) = await gameStorageService.SaveGameFileAsync(game.GameFile, id);
+                
+                if (!success)
+                {
+                    ModelState.AddModelError("GameFile", errorMessage ?? "Erreur lors de l'upload du fichier");
+                    ViewBag.GameId = id;
+                    ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+                    ViewBag.CurrentFileSize = gameStorageService.GetGameFileSizeInMB(id);
+                    return View("EditGame", game);
+                }
+                
+                game.SizeInMB = sizeInMB;
+            }
+            else
+            {
+                // Keep existing file size if no new file uploaded
+                game.SizeInMB = gameStorageService.GetGameFileSizeInMB(id);
             }
 
             var result = await gameService.UpdateGameAsync(id, game);
             if (result == null) return NotFound();
             
             return RedirectToAction("Details", new { id = id });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            // Delete the game file first
+            gameStorageService.DeleteGameFile(id);
+            
+            var success = await gameService.DeleteGameAsync(id);
+            if (!success)
+            {
+                TempData["Error"] = "Game not found or could not be deleted.";
+                return RedirectToAction("Shop");
+            }
+
+            TempData["Success"] = "Game deleted successfully.";
+            return RedirectToAction("Shop");
         }
 
         [Authorize(Roles = "Admin")]

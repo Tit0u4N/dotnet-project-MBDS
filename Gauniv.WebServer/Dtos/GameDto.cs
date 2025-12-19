@@ -27,6 +27,7 @@
 // Please respect the team's standards for any future contribution
 #endregion
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 
 namespace Gauniv.WebServer.Dtos;
@@ -42,6 +43,8 @@ public class GameFullDto
     public double Rating { get; set; }
     public string Developer { get; set; } = null!;
     public string Publisher { get; set; } = null!;
+    public int SizeInMB { get; set; } = 0;
+    public int MaxPlayersConnectedSimultaneously { get; set; } = 0;
     public ICollection<CategoryFullDto> GameCategories { get; set; }
 }
 
@@ -76,6 +79,17 @@ public class GameCreateOrEditDto
     public string Publisher { get; set; } = null!;
 
     public List<string> Categories { get; set; } = new List<string>();
+
+    /// <summary>
+    /// The game file to upload (must be .zip format). Only used for create/edit operations.
+    /// This is NOT stored in the database - only saved to filesystem.
+    /// </summary>
+    public IFormFile? GameFile { get; set; }
+
+    /// <summary>
+    /// The size of the game in MB (stored in database). Calculated from uploaded file.
+    /// </summary>
+    public int SizeInMB { get; set; } = 0;
 }
 
 

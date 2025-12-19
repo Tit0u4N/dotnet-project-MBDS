@@ -64,6 +64,12 @@ namespace Gauniv.WebServer.Data
         
         [MaxLength(150)]
         public string Publisher { get; set; } = null!;
+        
+        [Range(0, int.MaxValue)]
+        public int SizeInMB { get; set; } = 0;
+
+        [Range(0, int.MaxValue)] 
+        public int MaxPlayersConnectedSimultaneously { get; set; } = 0;
 
         // Relations
         public ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();

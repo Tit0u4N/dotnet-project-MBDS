@@ -18,5 +18,8 @@ namespace Gauniv.WebServer.Data
         public DateTime PurchaseDate { get; set; }
 
         public bool IsFavorite { get; set; }
+        
+        [Range(0, int.MaxValue)]
+        public int TimePlayedInMinutes { get; set; } = 0;
     }
 }

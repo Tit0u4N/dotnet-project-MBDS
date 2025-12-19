@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Gauniv.WebServer.Data;
 
@@ -66,6 +67,8 @@ namespace Gauniv.WebServer.Services
                 record.Developer = record.Developer.Trim('\'');
                 record.Publisher = record.Publisher.Trim('\'');
 
+                var random = new Random();
+                
                 // Creation of Game entity
                 var newGame = new Game
                 {
@@ -78,7 +81,9 @@ namespace Gauniv.WebServer.Services
                     Price = record.IsFree ? 0m : record.BaseAmount,
                     Rating = record.OverallAvgRating,
                     ReviewCount = record.ReviewCount,
-                    GameCategories = new List<GameCategory>()
+                    GameCategories = new List<GameCategory>(),
+                    MaxPlayersConnectedSimultaneously = random.Next(0, 1000),
+                    SizeInMB = 100 + random.Next(1, 5000) // Random size between 100MB and 5100MB
                 };
                 
                 //Parse categories

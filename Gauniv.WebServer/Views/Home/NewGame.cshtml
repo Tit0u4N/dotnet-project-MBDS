@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <h1>Create New Game</h1>
     <hr />
-    <form asp-action="CreateGame" method="post">
+    <form asp-action="CreateGame" method="post" enctype="multipart/form-data">
         <partial name="GameForm" model="Model" />
         
         <div class="mt-4">

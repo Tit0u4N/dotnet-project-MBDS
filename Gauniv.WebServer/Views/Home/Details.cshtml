@@ -27,7 +27,14 @@
                 <h1>@Model.Name</h1>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-action="EditGame" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <div class="d-flex gap-2">
+                        <a asp-action="EditGame" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <form asp-action="DeleteGame" asp-route-id="@Model.Id" method="post" 
+                              id="deleteGameForm"
+                              onsubmit="return confirmDelete('@Model.Name.Replace("'", "\\'").Replace("\"", "&quot;")');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
                 }
             </div>
             <p class="text-muted">Released on @Model.ReleaseDate.ToShortDateString()</p>
@@ -42,6 +49,16 @@
             <h4>Description</h4>
             <p class="lead">
                 @(string.IsNullOrEmpty(Model.Description) ? "No description available." : Model.Description)
+            </p>
+            
+            <h4>Size</h4>
+            <p class="lead">
+                @(Model.SizeInMB <= 0 ? "No size available." : Model.SizeInMB + " MB")
+            </p>
+            
+            <h4>Number of player simultaneous</h4>
+            <p class="lead">
+                @(Model.MaxPlayersConnectedSimultaneously < 0 ? "No data." : Model.MaxPlayersConnectedSimultaneously + " Players")
             </p>
 
 
@@ -81,3 +98,11 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(gameName) {
+            return confirm('Are you sure you want to delete the game "' + gameName + '"? This action cannot be undone.');
+        }
+    </script>
+}

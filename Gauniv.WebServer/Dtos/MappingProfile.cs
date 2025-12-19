@@ -44,7 +44,11 @@ namespace Gauniv.WebServer.Dtos
                     src => src.GameCategories.Select(gc => gc.Category));
             TypeAdapterConfig<GameFullDto, Game>.NewConfig();
             TypeAdapterConfig<Game, GameCreateOrEditDto>.NewConfig();
-            TypeAdapterConfig<GameCreateOrEditDto, Game>.NewConfig();
+            TypeAdapterConfig<GameCreateOrEditDto, Game>
+                .NewConfig()
+                .Ignore(dest => dest.Id)
+                .Ignore(dest => dest.GameCategories)
+                .Ignore(dest => dest.UserGames);
             TypeAdapterConfig<Category, CategoryFullDto>.NewConfig();
         }
     }
