@@ -47,6 +47,7 @@ namespace Gauniv.Client.Services
         private string token;
         private Gauniv_WebServerClient _webServerClient;
         public GamesClient GamesClient;
+        public CategoryClient CategoryClient;
 
         private NetworkService()
         {
@@ -54,6 +55,9 @@ namespace Gauniv.Client.Services
             _webServerClient = new Gauniv_WebServerClient(new HttpClient());
             GamesClient = new GamesClient(new HttpClient());
             GamesClient.ReadResponseAsString = true;
+            CategoryClient = new CategoryClient(new HttpClient());
+            CategoryClient.ReadResponseAsString = true;
+            
         }
 
         public event Action? OnConnected;
