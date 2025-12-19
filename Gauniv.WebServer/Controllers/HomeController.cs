@@ -72,9 +72,10 @@ namespace Gauniv.WebServer.Controllers
             [FromQuery] int limit = 20,
             [FromQuery] string? name = null,
             [FromQuery] decimal? minPrice = null,
-            [FromQuery] decimal? maxPrice = null)
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery(Name = "category")] int[]? category = null)
         {
-             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, null, null, null, offset, limit);
+             var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, null, null, offset, limit);
              
              ViewBag.Total = total;
              ViewBag.Offset = offset;
@@ -82,6 +83,8 @@ namespace Gauniv.WebServer.Controllers
              ViewBag.Name = name;
              ViewBag.MinPrice = minPrice;
              ViewBag.MaxPrice = maxPrice;
+             ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+             ViewBag.SelectedCategories = category ?? Array.Empty<int>();
 
              return View(games);
         }
@@ -92,12 +95,13 @@ namespace Gauniv.WebServer.Controllers
             [FromQuery] int limit = 20,
             [FromQuery] string? name = null,
             [FromQuery] decimal? minPrice = null,
-            [FromQuery] decimal? maxPrice = null)
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery(Name = "category")] int[]? category = null)
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Index", "Home");
 
-            var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, null, true, user.Id, offset, limit);
+            var (games, total) = await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, true, user.Id, offset, limit);
 
             ViewBag.Total = total;
             ViewBag.Offset = offset;
@@ -105,6 +109,8 @@ namespace Gauniv.WebServer.Controllers
             ViewBag.Name = name;
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
+            ViewBag.AllCategories = await categoryService.GetAllCategoriesAsync();
+            ViewBag.SelectedCategories = category ?? Array.Empty<int>();
 
             return View(games);
         }
@@ -222,6 +228,66 @@ namespace Gauniv.WebServer.Controllers
             if (result == null) return NotFound();
             
             return RedirectToAction("Details", new { id = id });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ManageCategories()
+        {
+            var categories = await categoryService.GetCategoriesWithGameCountAsync();
+            return View(categories);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(CategoryCreateOrEditDto category)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Title is required and must be less than 100 characters.";
+                return RedirectToAction("ManageCategories");
+            }
+
+            await categoryService.AddCategoryAsync(category);
+            TempData["Success"] = $"Category '{category.Title}' created successfully.";
+            return RedirectToAction("ManageCategories");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateCategoryAction(int id, CategoryCreateOrEditDto category)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Title is required and must be less than 100 characters.";
+                return RedirectToAction("ManageCategories");
+            }
+
+            var result = await categoryService.UpdateCategoryAsync(id, category);
+            if (result == null)
+            {
+                TempData["Error"] = "Category not found.";
+                return RedirectToAction("ManageCategories");
+            }
+
+            TempData["Success"] = $"Category '{category.Title}' updated successfully.";
+            return RedirectToAction("ManageCategories");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategoryAction(int id)
+        {
+            var (success, errorMessage) = await categoryService.DeleteCategoryAsync(id);
+            
+            if (!success)
+            {
+                TempData["Error"] = errorMessage ?? "Category not found.";
+                return RedirectToAction("ManageCategories");
+            }
+
+            TempData["Success"] = "Category deleted successfully.";
+            return RedirectToAction("ManageCategories");
         }
     }
 }

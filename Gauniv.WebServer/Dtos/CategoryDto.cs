@@ -14,3 +14,11 @@ public class CategoryCreateOrEditDto
     [MaxLength(100, ErrorMessage = "Title cannot exceed 100 characters.")]
     public string Title { get; set; } = null!;
 }
+
+public class CategoryWithGameCountDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = null!;
+    public int GameCount { get; set; }
+}
+

@@ -1,16 +1,59 @@
+@{
+    var allCategories = ViewBag.AllCategories as List<Gauniv.WebServer.Dtos.CategoryFullDto> ?? new List<Gauniv.WebServer.Dtos.CategoryFullDto>();
+    var selectedCategories = ViewBag.SelectedCategories as int[] ?? Array.Empty<int>();
+}
+
 <form method="get" class="mb-4 p-3 steam-filter-box rounded">
     <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="name" class="form-label">Search</label>
             <input type="text" class="form-control" id="name" name="name" value="@ViewBag.Name" placeholder="Game name...">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="minPrice" class="form-label">Min Price</label>
             <input type="number" class="form-control" id="minPrice" name="minPrice" value="@ViewBag.MinPrice" step="0.01" min="0">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="maxPrice" class="form-label">Max Price</label>
             <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@ViewBag.MaxPrice" step="0.01" min="0">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Categories</label>
+            <div class="category-multiselect-wrapper">
+                <div class="category-multiselect-trigger form-control" onclick="toggleCategoryDropdown(this)">
+                    <span class="selected-text">
+                        @if (selectedCategories.Any())
+                        {
+                            var selectedNames = allCategories.Where(c => selectedCategories.Contains(c.Id)).Select(c => c.Title);
+                            @string.Join(", ", selectedNames)
+                        }
+                        else
+                        {
+                            <text>All categories</text>
+                        }
+                    </span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="category-dropdown">
+                    <div class="category-dropdown-content">
+                        @foreach (var category in allCategories)
+                        {
+                            <label class="category-option">
+                                <input type="checkbox" 
+                                       name="category" 
+                                       value="@category.Id"
+                                       @(selectedCategories.Contains(category.Id) ? "checked" : "")>
+                                <span class="checkmark"></span>
+                                <span class="category-label">@category.Title</span>
+                            </label>
+                        }
+                        @if (!allCategories.Any())
+                        {
+                            <div class="no-categories">No categories available</div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -20,3 +63,37 @@
     <input type="hidden" name="offset" value="0" />
     <input type="hidden" name="limit" value="@ViewBag.Limit" />
 </form>
+
+<script>
+    function toggleCategoryDropdown(trigger) {
+        const wrapper = trigger.closest('.category-multiselect-wrapper');
+        wrapper.classList.toggle('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.category-multiselect-wrapper')) {
+            document.querySelectorAll('.category-multiselect-wrapper.open').forEach(w => {
+                w.classList.remove('open');
+            });
+        }
+    });
+
+    // Update display text when checkboxes change
+    document.querySelectorAll('.category-dropdown input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const wrapper = this.closest('.category-multiselect-wrapper');
+            const textSpan = wrapper.querySelector('.selected-text');
+            const checked = wrapper.querySelectorAll('input[type="checkbox"]:checked');
+            
+            if (checked.length === 0) {
+                textSpan.textContent = 'All categories';
+            } else {
+                const names = Array.from(checked).map(cb => 
+                    cb.closest('.category-option').querySelector('.category-label').textContent
+                );
+                textSpan.textContent = names.join(', ');
+            }
+        });
+    });
+</script>

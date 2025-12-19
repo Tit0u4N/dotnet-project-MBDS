@@ -25,14 +25,30 @@ public class CategoryService
         return addedCategory.Entity.Adapt<CategoryFullDto>();
     }
 
-    public async Task<bool> DeleteCategoryAsync(int categoryId)
+    /// <summary>
+    /// Deletes a category if it has no games assigned.
+    /// </summary>
+    /// <returns>
+    /// (true, null) if deleted successfully,
+    /// (false, null) if category not found,
+    /// (false, error message) if category has games
+    /// </returns>
+    public async Task<(bool Success, string? ErrorMessage)> DeleteCategoryAsync(int categoryId)
     {
-        var category = await _context.Set<Category>().FindAsync(categoryId);
-        if (category == null) return false;
+        var category = await _context.Set<Category>()
+            .Include(c => c.GameCategories)
+            .FirstOrDefaultAsync(c => c.Id == categoryId);
+        
+        if (category == null) return (false, null);
+
+        if (category.GameCategories.Any())
+        {
+            return (false, $"Cannot delete category '{category.Title}' because it is assigned to {category.GameCategories.Count} game(s).");
+        }
 
         _context.Set<Category>().Remove(category);
         await _context.SaveChangesAsync();
-        return true;
+        return (true, null);
     }
 
     public async Task<CategoryFullDto?> UpdateCategoryAsync(int categoryId, CategoryCreateOrEditDto categoryDto)
@@ -52,6 +68,19 @@ public class CategoryService
         return await _context.Set<Category>()
             .OrderBy(c => c.Title)
             .ProjectToType<CategoryFullDto>()
+            .ToListAsync();
+    }
+
+    public async Task<List<CategoryWithGameCountDto>> GetCategoriesWithGameCountAsync()
+    {
+        return await _context.Set<Category>()
+            .OrderBy(c => c.Title)
+            .Select(c => new CategoryWithGameCountDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                GameCount = c.GameCategories.Count
+            })
             .ToListAsync();
     }
 }

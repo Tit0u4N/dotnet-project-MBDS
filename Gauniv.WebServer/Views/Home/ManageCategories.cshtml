@@ -1,0 +1,143 @@
+@model IEnumerable<Gauniv.WebServer.Dtos.CategoryWithGameCountDto>
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Categories</h1>
+        <a asp-action="Shop" class="btn btn-outline-secondary">Back to Shop</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Add New Category Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Add New Category</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddCategory" method="post" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label for="newCategoryTitle" class="form-label">Category Title</label>
+                    <input type="text" class="form-control" id="newCategoryTitle" name="Title" 
+                           placeholder="Enter category name" required maxlength="100">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100">+ Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">All Categories</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info m-3">
+                    No categories found. Create your first category above.
+                </div>
+            }
+            else
+            {
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col" style="width: 50px">#</th>
+                            <th scope="col">Title</th>
+                            <th scope="col" style="width: 120px">Games</th>
+                            <th scope="col" style="width: 220px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model)
+                        {
+                            <tr id="category-row-@category.Id">
+                                <td>@category.Id</td>
+                                <td>
+                                    <span class="category-title-display">@category.Title</span>
+                                    <form asp-action="UpdateCategoryAction" method="post" 
+                                          class="category-edit-form d-none" asp-route-id="@category.Id">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   name="Title" value="@category.Title" required maxlength="100">
+                                            <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                            <button type="button" class="btn btn-sm btn-secondary cancel-edit-btn">Cancel</button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@category.GameCount game(s)</span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn me-1">
+                                        Edit
+                                    </button>
+                                    @if (category.GameCount == 0)
+                                    {
+                                        <form asp-action="DeleteCategoryAction" method="post" 
+                                              asp-route-id="@category.Id" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-danger" disabled
+                                                title="Cannot delete: category is assigned to games">
+                                            Delete
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Edit button click handler
+            document.querySelectorAll('.edit-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const row = this.closest('tr');
+                    row.querySelector('.category-title-display').classList.add('d-none');
+                    row.querySelector('.category-edit-form').classList.remove('d-none');
+                    this.classList.add('d-none');
+                });
+            });
+
+            // Cancel edit button click handler
+            document.querySelectorAll('.cancel-edit-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const row = this.closest('tr');
+                    row.querySelector('.category-title-display').classList.remove('d-none');
+                    row.querySelector('.category-edit-form').classList.add('d-none');
+                    row.querySelector('.edit-btn').classList.remove('d-none');
+                });
+            });
+        });
+    </script>
+}

@@ -31,18 +31,9 @@
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Dtos;
 using Gauniv.WebServer.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
-using System.Text;
-using CommunityToolkit.HighPerformance.Memory;
-using CommunityToolkit.HighPerformance;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using MapsterMapper;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
 
 namespace Gauniv.WebServer.Api
 {
@@ -53,40 +44,14 @@ namespace Gauniv.WebServer.Api
         UserManager<User> userManager,
         MappingProfile mappingProfile) : ControllerBase
     {
-        private readonly GameService _gameService = gameService;
-        private readonly UserManager<User> _userManager = userManager;
-
-        [HttpPost]
-        public async Task<ActionResult<GameFullDto>> AddGame(GameCreateOrEditDto game)
-        {
-            var createdGame = await _gameService.AddGameAsync(game);
-            return CreatedAtAction(nameof(GetAllGames), new { id = createdGame.Id }, createdGame);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(int id)
-        {
-            var result = await _gameService.DeleteGameAsync(id);
-            if (!result) return NotFound();
-            return NoContent();
-        }
-
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<GameFullDto>> UpdateGame(int id, GameCreateOrEditDto game)
-        {
-            var updatedGame = await _gameService.UpdateGameAsync(id, game);
-            if (updatedGame == null) return NotFound();
-            return Ok(updatedGame);
-        }
-
         [HttpPost("{id}/buy")]
         [Authorize]
         public async Task<IActionResult> BuyGame(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var success = await _gameService.BuyGameAsync(id, user.Id);
+            var success = await gameService.BuyGameAsync(id, user.Id);
             if (!success) return BadRequest("Unable to purchase game. It might not exist or you already own it.");
 
             return Ok();
@@ -95,7 +60,7 @@ namespace Gauniv.WebServer.Api
         [HttpGet("details/{id}")]
         public async Task<IActionResult> GetGameById([FromRoute] int id)
         {
-            var game = await _gameService.GetGameByIdAsync(id);
+            var game = await gameService.GetGameByIdAsync(id);
             if (game == null) return NotFound();
             return Ok(game);
         }
@@ -113,7 +78,7 @@ namespace Gauniv.WebServer.Api
             string? userId = null;
             if (owned.HasValue)
             {
-                var user = await _userManager.GetUserAsync(User);
+                var user = await userManager.GetUserAsync(User);
                 userId = user?.Id;
                 // If filtering by owned but not logged in, deciding to return empty or error?
                 // Assuming public API might ignore owned filter if not logged in, or treat as false.
@@ -121,7 +86,7 @@ namespace Gauniv.WebServer.Api
             }
 
             var (games, total) =
-                await _gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
+                await gameService.GetAllGamesAsync(name, minPrice, maxPrice, category, owned, userId, offset, limit);
 
             var totalPages = limit > 0 ? (int)Math.Ceiling(total / (double)limit) : 0;
 

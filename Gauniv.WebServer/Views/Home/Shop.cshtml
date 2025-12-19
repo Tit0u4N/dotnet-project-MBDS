@@ -6,6 +6,7 @@
     int total = ViewBag.Total ?? 0;
     int currentPage = (offset / limit) + 1;
     int totalPages = (int)Math.Ceiling((double)total / limit);
+    var selectedCategories = ViewBag.SelectedCategories as int[] ?? Array.Empty<int>();
 }
 
 <div class="container mt-4">
@@ -14,6 +15,7 @@
         <div>
             @if (User.IsInRole("Admin"))
             {
+                <a asp-action="ManageCategories" class="btn btn-secondary me-2">Manage Categories</a>
                 <a asp-action="NewGame" class="btn btn-primary me-2">+ Add New Game</a>
             }
             <a asp-action="MyGames" class="btn btn-outline-success">View My Library</a>
@@ -45,24 +47,39 @@
             <nav class="mt-4" aria-label="Game navigation">
                 <ul class="pagination justify-content-center">
                     <li class="page-item @(offset == 0 ? "disabled" : "")">
-                        <a class="page-link" asp-action="Shop" 
-                           asp-route-offset="@(Math.Max(0, offset - limit))" 
-                           asp-route-limit="@limit"
-                           asp-route-name="@ViewBag.Name"
-                           asp-route-minPrice="@ViewBag.MinPrice"
-                           asp-route-maxPrice="@ViewBag.MaxPrice">Previous</a>
+                        <a class="page-link" href="#" onclick="navigateWithCategories(@(Math.Max(0, offset - limit)), @limit); return false;">Previous</a>
                     </li>
                     <li class="page-item disabled"><span class="page-link">Page @currentPage of @totalPages</span></li>
                     <li class="page-item @(offset + limit >= total ? "disabled" : "")">
-                        <a class="page-link" asp-action="Shop" 
-                           asp-route-offset="@(offset + limit)" 
-                           asp-route-limit="@limit"
-                           asp-route-name="@ViewBag.Name"
-                           asp-route-minPrice="@ViewBag.MinPrice"
-                           asp-route-maxPrice="@ViewBag.MaxPrice">Next</a>
+                        <a class="page-link" href="#" onclick="navigateWithCategories(@(offset + limit), @limit); return false;">Next</a>
                     </li>
                 </ul>
             </nav>
         }
     }
 </div>
+
+<script>
+    function navigateWithCategories(newOffset, limit) {
+        const params = new URLSearchParams();
+        params.set('offset', newOffset);
+        params.set('limit', limit);
+        
+        const name = '@(ViewBag.Name ?? "")';
+        if (name) params.set('name', name);
+        
+        const minPrice = '@(ViewBag.MinPrice?.ToString() ?? "")';
+        if (minPrice) params.set('minPrice', minPrice);
+        
+        const maxPrice = '@(ViewBag.MaxPrice?.ToString() ?? "")';
+        if (maxPrice) params.set('maxPrice', maxPrice);
+        
+        @foreach (var catId in selectedCategories)
+        {
+            <text>params.append('category', '@catId');</text>
+        }
+        
+        window.location.href = '@Url.Action("Shop")?' + params.toString();
+    }
+</script>
+

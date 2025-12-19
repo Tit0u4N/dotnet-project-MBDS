@@ -138,7 +138,11 @@ public class GameService
         int offset = 0,
         int limit = 10)
     {
-        var query = _context.Games.AsQueryable();
+        var query = _context.Games
+            .AsNoTracking()
+            .Include(g => g.GameCategories)
+            .ThenInclude(gc => gc.Category)
+            .AsQueryable();
 
         // Filter by Name
         if (!string.IsNullOrEmpty(name))
