@@ -28,14 +28,12 @@
 #endregion
 using Gauniv.WebServer.Websocket;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Gauniv.WebServer.Services
 {
     public class OnlineService(IHubContext<OnlineHub> hubContext) : IHostedService
     {
-        private readonly IHubContext<OnlineHub> hubContext = hubContext;
-        private Task? task;
+        private readonly IHubContext<OnlineHub> _hubContext = hubContext;
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -45,6 +43,22 @@ namespace Gauniv.WebServer.Services
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Gets the list of currently online players
+        /// </summary>
+        public static List<OnlinePlayerDto> GetOnlinePlayers()
+        {
+            return OnlineHub.GetOnlinePlayersList();
+        }
+
+        /// <summary>
+        /// Gets the count of currently online players
+        /// </summary>
+        public static int GetOnlinePlayersCount()
+        {
+            return OnlineHub.GetOnlinePlayersCount();
         }
     }
 }

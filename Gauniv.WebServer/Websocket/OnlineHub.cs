@@ -26,23 +26,38 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+using System.Collections.Concurrent;
 using Gauniv.WebServer.Data;
 using Gauniv.WebServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 
-public class OnlineStatus()
-{
-    public User User { get; set; }
-    public int Count { get; set; }
-}
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gauniv.WebServer.Websocket
 {
+    [Authorize]
+    public class OnlinePlayerDto
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public DateTime ConnectedAt { get; set; }
+    }
+
+    public class OnlineStatus
+    {
+        public User User { get; set; } = null!;
+        public int ConnectionCount { get; set; }
+        public DateTime ConnectedAt { get; set; }
+        public HashSet<string> ConnectionIds { get; set; } = new();
+    }
+
+    [Authorize]
     public class OnlineHub : Hub
     {
-
-        public static Dictionary<string, OnlineStatus> ConnectedUsers = [];
+        private static readonly ConcurrentDictionary<string, OnlineStatus> ConnectedUsers = new();
+        private static readonly object _lock = new();
         private readonly UserManager<User> userManager;
 
         public OnlineHub(UserManager<User> userManager)
@@ -50,12 +65,98 @@ namespace Gauniv.WebServer.Websocket
             this.userManager = userManager;
         }
 
-        public async override Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
+            var user = await userManager.GetUserAsync(Context.User!);
+            if (user != null)
+            {
+                lock (_lock)
+                {
+                    if (ConnectedUsers.TryGetValue(user.Id, out var status))
+                    {
+                        status.ConnectionCount++;
+                        status.ConnectionIds.Add(Context.ConnectionId);
+                    }
+                    else
+                    {
+                        ConnectedUsers[user.Id] = new OnlineStatus
+                        {
+                            User = user,
+                            ConnectionCount = 1,
+                            ConnectedAt = DateTime.UtcNow,
+                            ConnectionIds = new HashSet<string> { Context.ConnectionId }
+                        };
+                    }
+                }
+
+                // Broadcast updated player list to all clients
+                await BroadcastPlayerList();
+            }
+
+            await base.OnConnectedAsync();
         }
 
-        public async override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            var user = await userManager.GetUserAsync(Context.User!);
+            if (user != null)
+            {
+                lock (_lock)
+                {
+                    if (ConnectedUsers.TryGetValue(user.Id, out var status))
+                    {
+                        status.ConnectionIds.Remove(Context.ConnectionId);
+                        status.ConnectionCount--;
+
+                        if (status.ConnectionCount <= 0)
+                        {
+                            ConnectedUsers.TryRemove(user.Id, out _);
+                        }
+                    }
+                }
+
+                // Broadcast updated player list to all clients
+                await BroadcastPlayerList();
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task SendMessage()
+        {
+            // Keep heartbeat functionality
+            await Clients.Caller.SendAsync("ReceiveMessage", "Heartbeat received");
+        }
+
+        public async Task GetOnlinePlayers()
+        {
+            var players = GetOnlinePlayersList();
+            await Clients.Caller.SendAsync("ReceivePlayerList", players);
+        }
+
+        private async Task BroadcastPlayerList()
+        {
+            var players = GetOnlinePlayersList();
+            await Clients.All.SendAsync("ReceivePlayerList", players);
+        }
+
+        public static List<OnlinePlayerDto> GetOnlinePlayersList()
+        {
+            lock (_lock)
+            {
+                return ConnectedUsers.Values.Select(s => new OnlinePlayerDto
+                {
+                    UserId = s.User.Id,
+                    UserName = s.User.UserName ?? "Unknown",
+                    Email = s.User.Email ?? "",
+                    ConnectedAt = s.ConnectedAt
+                }).OrderBy(p => p.ConnectedAt).ToList();
+            }
+        }
+
+        public static int GetOnlinePlayersCount()
+        {
+            return ConnectedUsers.Count;
         }
     }
 }
