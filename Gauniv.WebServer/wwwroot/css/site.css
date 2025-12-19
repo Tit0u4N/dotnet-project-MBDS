@@ -339,3 +339,109 @@ main {
 .category-dropdown::-webkit-scrollbar-thumb:hover {
   background: var(--steam-text-highlight);
 }
+
+/* ========================================
+   Players Page Styles
+   ======================================== */
+
+/* Player Card */
+.player-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 192, 244, 0.2);
+  border-color: var(--steam-text-highlight);
+}
+
+/* Avatar Circle */
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, var(--steam-btn-gradient-top), var(--steam-btn-gradient-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* Online Dot Indicator */
+.online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: #28a745;
+  border-radius: 50%;
+  border: 3px solid var(--steam-card-bg);
+  animation: pulse-dot 2s infinite;
+}
+
+/* Online Pulse for Badge */
+.online-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #fff;
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(40, 167, 69, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+/* Connection Status Indicator */
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.connection-status.connected {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.connection-status.reconnecting {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.connection-status.disconnected,
+.connection-status.error {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.connection-status .status-icon {
+  font-size: 0.75rem;
+}
+
+/* No Players Message */
+.no-players {
+  text-align: center;
+  padding: 2rem;
+  color: #8f98a0;
+}

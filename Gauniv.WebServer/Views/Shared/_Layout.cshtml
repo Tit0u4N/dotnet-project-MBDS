@@ -34,6 +34,11 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="MyGames">My Games</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Players">
+                                    Players <span id="nav-online-badge" class="badge bg-success">0</span>
+                                </a>
+                            </li>
                         }
                         @if (User.IsInRole("Admin"))
                         {

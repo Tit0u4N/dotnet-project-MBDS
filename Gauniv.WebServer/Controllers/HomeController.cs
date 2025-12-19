@@ -177,6 +177,14 @@ namespace Gauniv.WebServer.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [Authorize]
+        public IActionResult Players()
+        {
+            var players = Gauniv.WebServer.Websocket.OnlineHub.GetOnlinePlayersList();
+            return View(players);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> NewGame()
