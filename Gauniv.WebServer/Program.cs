@@ -105,6 +105,7 @@ builder.Services.AddScoped<MappingProfile, MappingProfile>();
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<GameStorageService>();
+builder.Services.AddScoped<StatsService>();
 
 var app = builder.Build();
 

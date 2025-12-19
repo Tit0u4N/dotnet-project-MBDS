@@ -54,6 +54,7 @@ namespace Gauniv.WebServer.Controllers
         GameService gameService,
         CategoryService categoryService,
         GameStorageService gameStorageService,
+        StatsService statsService,
         MappingProfile mappingProfile
         ) : Controller
     {
@@ -63,10 +64,17 @@ namespace Gauniv.WebServer.Controllers
         private readonly GameService gameService = gameService;
         private readonly CategoryService categoryService = categoryService;
         private readonly GameStorageService gameStorageService = gameStorageService;
+        private readonly StatsService statsService = statsService;
 
         public IActionResult Index()
         {
-            return RedirectToAction("Shop");
+            return RedirectToAction("Stats");
+        }
+
+        public async Task<IActionResult> Stats()
+        {
+            var stats = await statsService.GetPlatformStatsAsync();
+            return View(stats);
         }
 
         public async Task<IActionResult> Shop(
