@@ -42,6 +42,7 @@ namespace Gauniv.WebServer.Api
     [ApiController]
     public class GamesController(
         GameService gameService,
+        GameStorageService gameStorageService,
         UserManager<User> userManager,
         ApplicationDbContext applicationDbContext,
         MappingProfile mappingProfile) : ControllerBase
@@ -57,6 +58,24 @@ namespace Gauniv.WebServer.Api
             if (!success) return BadRequest("Unable to purchase game. It might not exist or you already own it.");
 
             return Ok();
+        }
+        
+        [HttpGet("{id}/download")]
+        [Authorize]
+        public async Task<IActionResult> DownloadGame(int id)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+            
+            //check if user owns the game
+            var ownsGame = await applicationDbContext.Set<UserGame>()
+                .AnyAsync(ug => ug.User.Id == user.Id && ug.Game.Id == id);
+            if (!ownsGame) return Forbid("You do not own this game.");
+
+            var fileStream = gameStorageService.OpenGameFileStream(id);
+            if (fileStream == null) return BadRequest("Unable to download game. It might not exist or you do not own it.");
+
+            return File(fileStream, "application/octet-stream", $"game_{id}.zip", enableRangeProcessing: true);
         }
 
         [HttpGet("details/{id}")]

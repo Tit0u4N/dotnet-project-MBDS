@@ -48,6 +48,7 @@ namespace Gauniv.Client.Services
         private Gauniv_WebServerClient _webServerClient;
         public GamesClient GamesClient;
         public CategoryClient CategoryClient;
+        public UserClient UserClient;
 
         private NetworkService()
         {
@@ -57,7 +58,16 @@ namespace Gauniv.Client.Services
             GamesClient.ReadResponseAsString = true;
             CategoryClient = new CategoryClient(new HttpClient());
             CategoryClient.ReadResponseAsString = true;
-            
+            UserClient = new UserClient(new HttpClient());
+            UserClient.ReadResponseAsString = true;
+        }
+        
+        public void SetBaseUrl(string baseUrl)
+        {
+            _webServerClient.BaseUrl = baseUrl;
+            GamesClient.BaseUrl = baseUrl;
+            CategoryClient.BaseUrl = baseUrl;
+            UserClient.BaseUrl = baseUrl;
         }
 
         public event Action? OnConnected;

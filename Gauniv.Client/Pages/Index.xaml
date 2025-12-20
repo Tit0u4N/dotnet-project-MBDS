@@ -31,6 +31,7 @@ Please respect the team's standards for any future contribution
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
              xmlns:proxy="using:Gauniv.Client.Proxy"
+             xmlns:viewModel="using:Gauniv.Client.ViewModel"
              x:Class="Gauniv.Client.Pages.Index"
              Title="Index"
              x:DataType="vm:IndexViewModel"
@@ -145,9 +146,9 @@ Please respect the team's standards for any future contribution
                         </CollectionView>
                     </VerticalStackLayout>
 
-                    <!-- Optional apply button (uses SearchCommand) -->
+                    <!-- apply button (uses SearchCommand) -->
                     <VerticalStackLayout Grid.Row="2" Spacing="2" HorizontalOptions="Center">
-                        <Button Text="Filtrer" Command="{Binding SearchCommand}" HeightRequest="36" VerticalOptions="Center" />
+                        <Button Text="Filter" Command="{Binding SearchCommand}" HeightRequest="36" VerticalOptions="Center" />
                     </VerticalStackLayout>
                 </Grid>
             </Grid>

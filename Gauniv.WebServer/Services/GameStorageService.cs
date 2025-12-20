@@ -10,6 +10,7 @@ public class GameStorageService
 {
     private readonly string _storagePath;
     private readonly ILogger<GameStorageService> _logger;
+    private const string DefaultGameFile = "default.zip";
     private const long MaxFileSizeBytes = 50L * 1024 * 1024 * 1024; // 50 GB max
 
     public GameStorageService(IWebHostEnvironment environment, ILogger<GameStorageService> logger)
@@ -164,8 +165,27 @@ public class GameStorageService
     public FileStream? OpenGameFileStream(int gameId)
     {
         var filePath = GetGameFilePath(gameId);
-        if (filePath == null) return null;
-        
-        return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 81920, useAsync: true);
+        if (filePath == null)
+        {
+            if(IsDefaultGamePresent())
+            {
+                filePath = Path.Combine(_storagePath, DefaultGameFile);
+                _logger.LogWarning("Game file for game {GameId} not found. Serving default game file.", gameId);
+            }
+            else
+            {
+                _logger.LogError("Game file for game {GameId} not found and no default game present.", gameId);
+                return null;
+            }
+        }
+        var fileInfo = new FileInfo(filePath);
+        return !fileInfo.Exists ? null : new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 81920, useAsync: true);
+    }
+    
+    
+    private bool IsDefaultGamePresent()
+    {
+        var defaultFilePath = Path.Combine(_storagePath, DefaultGameFile);
+        return File.Exists(defaultFilePath);
     }
 }

@@ -107,11 +107,30 @@ Please respect the team's standards for any future contribution
                             </Button.Triggers>
                         </Button>
                         <Button Text="Download"
+                                Command="{Binding DownloadCommand}"
                                 TextColor="{StaticResource TextLight}"
                                 BackgroundColor="{StaticResource InputBackground}"
                                 HorizontalOptions="Start"
-                                IsVisible="{Binding Game.IsOwned}" />
+                                IsVisible="{Binding IsDownloadButtonEnabled}"
+                                IsEnabled="{Binding IsDownloadButtonEnabled}" />
+                        <Button Text="Pause"
+                                Command="{Binding DownloadCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsDownloading}"
+                                IsEnabled="{Binding IsDownloadButtonEnabled}" />
+                        <Label Text="{Binding DownloadPercent, StringFormat='Downloading... {0}%'}"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsDownloading}" />
+                        <Label Text="{Binding UnzipPercent, StringFormat='Unzipping... {0}%'}"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsUnzipping}" />
                     </HorizontalStackLayout>
+
+                    <!-- ProgressBar pour le téléchargement -->
+                    <ProgressBar IsVisible="{Binding IsDownloading}" Progress="{Binding DownloadProgress}" HeightRequest="4" />
+                    <ProgressBar IsVisible="{Binding IsUnzipping}" Progress="{Binding UnzipProgress}" HeightRequest="4" />
 
                 </VerticalStackLayout>
             </Grid>
