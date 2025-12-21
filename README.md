@@ -17,8 +17,11 @@ Ajouter à celui-ci un jeu multijoueur comprenant le serveur ainsi que le jeu co
 ## Setup requis
 
 - Ajouter le fihier `default.zip` dans `Gauniv.WebServer/GameUploads/` pour le bon fonctionnement de l'application. Le
-  fichier peut être un binaire zipé ou non mais doit exister. (si il n'est pas zipé il ne pourra pas etre lancé depuis
-  le client)
+  fichier doit contenit un binaire valide (.exe) pour windows. (Seul windows est supporté). On suppose aussi que un seul 
+  .exe est présent dans le zip. (Le client lourd lancera le premier .exe trouvé dans le zip)
+- Si vous utilisez un autre adresse ou port pour le serveur web, modifier la variable `apiUrl` dans
+  `Gauniv.Client/MauiProgram.cs` pour que le client puisse se connecter au serveur web. 
+  (Par défaut `http://localhost:5231/`)
 
 # Plateforme de distribution de contenu (ASP.NET)
 
@@ -67,13 +70,13 @@ d'implementer des foncitonnalités d'administration pour gérer les jeux et les 
 - [x]  En suivant le même principe, il est nécessaire de ne pas stocker l’ensemble du fichier en mémoire avant de
   l’envoyer. Streamer le binaire en direct pour réduire l’empreinte mémoire de votre serveur.
 
-## Partocularités techniques et metiers
+## Particularités techniques et metiers
 
 Lors de la premier lancement sur un BDD postgreSQL vide, en plus de créer les tables plus de 5000 jeux venant d'un
 dataset de gog.com seront insérés dans la base de données. Mais les jeux n'on pas de fichier binaire associé, le zip
 `default.zip` sera utilisé à la place.
 
-Il n'existe pas de filtre "jeux possédés" car il y a une page `Shop`avec tout les jeux et une page `MyGames` avec
+Il n'existe pas de filtre "jeux possédés" car il y a une page `Shop` avec tout les jeux et une page `MyGames` avec
 seulement les jeux possédés par l'utilisateur.
 
 Il est imposible de supprimer une categorie si au moins un jeu y est rattaché.
@@ -87,20 +90,20 @@ Il est imposible de supprimer une categorie si au moins un jeu y est rattaché.
   - [x]  Incluant la pagination (scroll infini, bouton ou autres)
   - [x]  Filtrer par jeux possédés / catégorie / prix / …
 - Lister les jeux possédés
-  - [ ]  Lister les jeux possédés par le joueur (vous pouvez définir la limite comme bon vous semble)
-  - [ ]  Incluant la pagination (scroll infini, bouton ou autres)
-  - [ ]  Filtrer par jeux possédés / catégorie / prix / …
+  - [x]  Lister les jeux possédés par le joueur (vous pouvez définir la limite comme bon vous semble)
+  - [x]  Incluant la pagination (scroll infini, bouton ou autres)
+  - [x]  Filtrer par jeux possédés / catégorie / prix / …
 - Afficher les détails d’un jeu 
-  - [ ] nom, description, statuts, catégories)
-  - [ ]  Description
-  - [ ]  Statuts (acheté / non acheté, téléchargé / non téléchargé, en cours de jeu, …)
-  - [ ]  Categories
+  - [x] nom, description, statuts, catégories)
+  - [x]  Description
+  - [x]  Statuts (acheté / non acheté, téléchargé / non téléchargé, en cours de jeu, …)
+  - [x]  Categories
 -  Télécharger, supprimer et lancer un jeu
   - [x]  L’utilisateur ne devra pas voir les boutons "jouer" et "supprimer" si le jeu n’a pas été téléchargé
-  - [ ]  De même, le bouton "télécharger" ne sera pas visible si le jeu est déjà disponible
-  - [ ]  Jouer à un jeu
-  - [ ]  Visualiser l’état du jeu (non téléchargé, prêt, en jeu, …)
-  - [ ]  Contrôler le jeu (lancement, arrêt forcé, …)
+  - [x]  De même, le bouton "télécharger" ne sera pas visible si le jeu est déjà disponible
+  - [x]  Jouer à un jeu
+  - [x]  Visualiser l’état du jeu (non téléchargé, prêt, en jeu, …)
+  - [x]  Contrôler le jeu (lancement, arrêt forcé, …)
 - [x]  Voir et mettre à jour son profil d’application (dossier d’installation, identifiants, …)
 
 ### **Options**
@@ -115,3 +118,16 @@ Il est imposible de supprimer une categorie si au moins un jeu y est rattaché.
 - [ ]  Changer les boutons de contrôle en fonction de l'état de la lecture (comme un lecteur vidéo, ex : YouTube)
 - [ ]  Commencer à lire à partir de la sélection de l'utilisateur. L'utilisateur doit pouvoir faire un clic droit sur un
   mot et lancer la lecture à partir de ce mot
+
+## Particularités techniques et metiers
+
+Le client lourd fonctionne seulement sous Windows. Après le téléchargement d'un jeu, le client décompresse le zip
+dans le dossier d'installation choisi par l'utilisateur (par défaut `./games/` dans le dossier de l'application) et lance le
+premier `.exe` trouvé dans le zip.
+
+Pour changer l'URL du serveur web, il faut changer `apiUrl` dans `Gauniv.Client/MauiProgram.cs`.
+
+Il est possible de lancer plusieurs jeux en même temps.
+
+Le téléchargement peut être mis en pause et repris (même après la fermeture de l'application). Le téléchargement peut 
+être annulé mais pas l'extraction du zip.

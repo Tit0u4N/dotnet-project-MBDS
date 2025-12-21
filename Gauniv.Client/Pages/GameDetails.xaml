@@ -93,6 +93,11 @@ Please respect the team's standards for any future contribution
                     
                     <Label Text="{Binding Game.PurchaseDate, StringFormat='Purchased on {0:yyyy-MM-dd}'}"
                            IsVisible="{Binding Game.IsOwned}" TextColor="Gray" />
+                    
+                    <Label Text="Downloaded"
+                           IsVisible="{Binding IsDownloaded}" TextColor="Gray" />
+                    <Label Text="Executing"
+                           IsVisible="{Binding IsRunning}" TextColor="Gray" />
 
                     <!-- Action buttons/info -->
                     <HorizontalStackLayout Spacing="12" Margin="0,8,0,0" IsVisible="{Binding IsConnected}">
