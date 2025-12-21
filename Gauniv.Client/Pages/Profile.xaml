@@ -95,6 +95,18 @@ Please respect the team's standards for any future contribution
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
+            
+            <Border Padding="10" BackgroundColor="{StaticResource CardBackground}">
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Logout" 
+                                TextColor="White"
+                                BackgroundColor="DarkRed"
+                                Command="{Binding LogoutCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
 
         </VerticalStackLayout>
     </Grid>

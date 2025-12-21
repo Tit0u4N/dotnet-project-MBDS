@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Gauniv.Client.Pages;
 using Gauniv.Client.Services;
 using Gauniv.Client.Proxy;
 
@@ -37,6 +38,7 @@ namespace Gauniv.Client.ViewModel
         public IAsyncRelayCommand ChangeEmailCommand { get; }
         public IAsyncRelayCommand ChangePasswordCommand { get; }
         public IAsyncRelayCommand SetDownloadPathCommand { get; }
+        public IAsyncRelayCommand LogoutCommand { get; }
 
         public ProfileViewModel()
         {
@@ -46,6 +48,7 @@ namespace Gauniv.Client.ViewModel
             ChangeEmailCommand = new AsyncRelayCommand(ChangeEmailAsync);
             ChangePasswordCommand = new AsyncRelayCommand(ChangePasswordAsync);
             SetDownloadPathCommand = new AsyncRelayCommand(SetDownloadPathAsync);
+            LogoutCommand = new AsyncRelayCommand(LogoutAsync);
         }
 
         private async Task ChangeEmailAsync()
@@ -121,6 +124,26 @@ namespace Gauniv.Client.ViewModel
             }
 
             await Task.CompletedTask;
+        }
+
+        private async Task LogoutAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                await NetworkService.Instance.Logout();
+                NavigationService.Instance.Navigate<LoginPage>(new Dictionary<string, object>());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Logout failed: {ex.Message}");
+                await Application.Current?.Windows[0]?.Page
+                    ?.DisplayAlertAsync("Error", $"Logout failed: {ex.Message}", "OK")!;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
     }
 }

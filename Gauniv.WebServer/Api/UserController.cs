@@ -9,7 +9,7 @@ namespace Gauniv.WebServer.Api
     [ApiController]
     public class UserController(
         UserManager<User> userManager,
-        ApplicationDbContext applicationDbContext) : ControllerBase
+        SignInManager<User> signInManager) : ControllerBase
     {
 
         [HttpPost("change-password")]
@@ -64,6 +64,13 @@ namespace Gauniv.WebServer.Api
             return Ok("Email changed successfully.");
 
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            // Signs the user out (clears cookies / authentication session)
+            await signInManager.SignOutAsync();
+            return Ok("Logged out successfully.");
+        }
     }
 }
-    
