@@ -67,6 +67,10 @@ Please respect the team's standards for any future contribution
                     <Label Text="Description" FontAttributes="Bold" />
                     <Label Text="{Binding Game.Description}" LineBreakMode="WordWrap" />
 
+                    <Label Text="Categories" FontAttributes="Bold" />
+                    <Label Text="{Binding Categories}" LineBreakMode="WordWrap" />
+
+                    
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
                         <Label Text="Release:" FontAttributes="Bold" />
                         <Label Text="{Binding Game.ReleaseDate, StringFormat='{0:yyyy-MM-dd}'}" />
@@ -114,23 +118,62 @@ Please respect the team's standards for any future contribution
                                 IsVisible="{Binding IsDownloadButtonEnabled}"
                                 IsEnabled="{Binding IsDownloadButtonEnabled}" />
                         <Button Text="Pause"
-                                Command="{Binding DownloadCommand}"
+                                Command="{Binding PauseCommand}"
                                 TextColor="{StaticResource TextLight}"
                                 BackgroundColor="{StaticResource InputBackground}"
                                 HorizontalOptions="Start"
                                 IsVisible="{Binding IsDownloading}"
-                                IsEnabled="{Binding IsDownloadButtonEnabled}" />
+                                IsEnabled="{Binding IsDownloading}" />
+                        <!-- Bouton Resume visible lorsque mis en pause -->
+                        <Button Text="Resume"
+                                Command="{Binding ResumeCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsPaused}"
+                                IsEnabled="{Binding IsPaused}" />
+                        
+                        <Button Text="Cancel"
+                                Command="{Binding CancelCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsCancelable}"
+                                IsEnabled="{Binding IsCancelable}" />
+                        
+                        
+                        <Button Text="Play"
+                                Command="{Binding DownloadCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsDownloaded}"
+                                IsEnabled="{Binding IsDownloaded}" />
+                        <Button Text="Uninstall"
+                                Command="{Binding UnInstallCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsDownloaded}"
+                                IsEnabled="{Binding IsDownloaded}" />
+                        
+                        <!-- Labels to show download/unzip progress -->
                         <Label Text="{Binding DownloadPercent, StringFormat='Downloading... {0}%'}"
                                VerticalOptions="Center"
                                IsVisible="{Binding IsDownloading}" />
+                        <Label Text="{Binding DownloadPercent, StringFormat='Download stopped at {0}%'}"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsPaused}" />
                         <Label Text="{Binding UnzipPercent, StringFormat='Unzipping... {0}%'}"
                                VerticalOptions="Center"
                                IsVisible="{Binding IsUnzipping}" />
+                        <Label Text="{Binding UnzipPercent, StringFormat='Uninstalling... {0}%'}"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsUninstalling}" />
                     </HorizontalStackLayout>
 
                     <!-- ProgressBar pour le téléchargement -->
-                    <ProgressBar IsVisible="{Binding IsDownloading}" Progress="{Binding DownloadProgress}" HeightRequest="4" />
-                    <ProgressBar IsVisible="{Binding IsUnzipping}" Progress="{Binding UnzipProgress}" HeightRequest="4" />
+                    <ProgressBar IsVisible="{Binding IsProgressBarEnabled}" Progress="{Binding Progress}" HeightRequest="4" />
 
                 </VerticalStackLayout>
             </Grid>

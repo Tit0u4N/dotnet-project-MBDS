@@ -32,9 +32,146 @@ Please respect the team's standards for any future contribution
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:proxy="using:Gauniv.Client.Proxy"
              x:Class="Gauniv.Client.Pages.MyGames"
              Title="MyGames"
              x:DataType="vm:MyGamesViewModel"
              BindingContext="{vm:MyGamesViewModel}">
-    <Label Text="List de mes jeux" />
+    <Grid>
+        
+        <Grid
+            IsVisible="{Binding IsLoading}"
+            ZIndex="300"
+            BackgroundColor="#50000000">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </Grid>
+        <Grid Padding="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <!-- Header: recherche + picker -->
+                <RowDefinition Height="Auto" /> <!-- Loading + erreur -->
+                <RowDefinition Height="*" />    <!-- CollectionView: prend l'espace restant -->
+                <RowDefinition Height="Auto" /> <!-- Pagination -->
+            </Grid.RowDefinitions>
+
+            <!-- Header: Search + page size picker -->
+            <Grid Grid.Row="0" VerticalOptions="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Logo centré -->
+                <VerticalStackLayout Grid.Column="1">
+                    <Image Source="logo_vapeur_big.png" HeightRequest="80" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Label Text="My Games" FontSize="24" TextColor="{StaticResource TextLight}" HorizontalOptions="Center" VerticalOptions="Center" />
+                </VerticalStackLayout>
+                
+                <!-- SearchBar et Picker collés à droite -->
+                <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
+                    <SearchBar Placeholder="Search a game" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
+
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- Loading indicator and error -->
+            <VerticalStackLayout Grid.Row="1">
+                <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
+            </VerticalStackLayout>
+            <!-- Games grid: occupe l'espace restant et est scrollable -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <!-- CollectionView principal -->
+                    <CollectionView x:Name="GamesCollection"
+                                    IsVisible="{Binding IsNotUpdating}"
+                                    IsEnabled="{Binding IsNotUpdating}"
+                                    ItemsSource="{Binding Games}" 
+                                    SelectionMode="Single" 
+                                    SelectedItem="{Binding SelectedGame, Mode=TwoWay}" 
+                                    MaximumWidthRequest="1100" 
+                                    HorizontalOptions="Center" 
+                                    VerticalOptions="FillAndExpand">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="{Binding GridSpan}" HorizontalItemSpacing="12" VerticalItemSpacing="12"  />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="proxy:GameFullDto">
+                                    <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8">
+                                        <Image Source="{Binding ImageUrl}"  HeightRequest="200" MaximumWidthRequest="150" Aspect="AspectFit" Margin="4"/>
+                                        <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Price, StringFormat='Price: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
+                                    </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                
+                    
+                <!-- Here put a list of categories with a select -->
+                <Grid Grid.Column="1">
+                    
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <!-- Min / Max price -->
+                    <HorizontalStackLayout Grid.Row="0" Spacing="8" HorizontalOptions="Center">
+                        <VerticalStackLayout  Spacing="2" HorizontalOptions="Center">
+                            <Label Text="Min price" FontSize="Micro" />
+                            <!-- Bind directly to the numeric property; Numeric keyboard -->
+                            <Entry Text="{Binding MinPriceString, Mode=TwoWay}" Placeholder="0.00" WidthRequest="100" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                            <Label Text="Max price" FontSize="Micro" />
+                            <Entry Text="{Binding MaxPriceString, Mode=TwoWay}" Placeholder="0.00" WidthRequest="100" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                        
+                    <!-- Category multi-picker : CollectionView avec CheckBox -->
+                    <VerticalStackLayout Grid.Row="1" Spacing="2">
+                        <Label Text="Categories" FontAttributes="Bold" />
+                        <CollectionView ItemsSource="{Binding Categories}" SelectionMode="None" HeightRequest="240" WidthRequest="220" Margin="0,8,0,8">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="proxy:CategoryDto">
+                                    <HorizontalStackLayout Spacing="8" Padding="4">
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                        <!-- Instead of a direct bool on the DTO, we handle selection via bindings to the ViewModel using an EventHandler on CheckedChanged via a command -->
+                                        <Label Text="{Binding Title}" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+
+                    <!-- apply button (uses SearchCommand) -->
+                    <VerticalStackLayout Grid.Row="2" Spacing="2" HorizontalOptions="Center">
+                        <Button Text="Filter" Command="{Binding SearchCommand}" HeightRequest="36" VerticalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Grid>
+
+            <!-- Pagination controls -->
+            <HorizontalStackLayout Grid.Row="3" Spacing="12" HorizontalOptions="Center" VerticalOptions="EndAndExpand" Margin="0,12,0,0">
+                <Button Text="Previous" 
+                        IsEnabled="{Binding IsPrevPageEnabled}"
+                        TextColor="{StaticResource TextLight}"
+                        BackgroundColor="{StaticResource InputBackground}"
+                        Command="{Binding PrevPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+                <Label Text="{Binding CurrentPageDisplay, StringFormat='Page {0}'}" VerticalOptions="Center" />
+                <Label Text="/" VerticalOptions="Center" />
+                <Label Text="{Binding TotalPages}" VerticalOptions="Center" />
+                <Button
+                    TextColor="{StaticResource TextLight}"
+                    IsEnabled="{Binding IsNextPageEnabled}"
+                    BackgroundColor="{StaticResource InputBackground}" 
+                    Text="Next" Command="{Binding NextPageCommand}" HeightRequest="36" VerticalOptions="Center" />
+                <Picker Title="Per page" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize, Mode=TwoWay}" WidthRequest="110" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
 </ContentPage>
