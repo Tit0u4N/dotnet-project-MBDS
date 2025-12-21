@@ -16,6 +16,8 @@ Ajouter à celui-ci un jeu multijoueur comprenant le serveur ainsi que le jeu co
 
 ## Setup requis
 
+- Lancez le docker compose des bases de données
+- Lancez les migrations Entity Framework de `Gauniv.WebServer` pour créer la base de données.
 - Ajouter le fihier `default.zip` dans `Gauniv.WebServer/GameUploads/` pour le bon fonctionnement de l'application. Le
   fichier doit contenit un binaire valide (.exe) pour windows. (Seul windows est supporté). On suppose aussi que un seul 
   .exe est présent dans le zip. (Le client lourd lancera le premier .exe trouvé dans le zip)
