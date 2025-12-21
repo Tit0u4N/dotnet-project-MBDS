@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Gauniv.Client.Proxy;
 using Gauniv.Client.Services;
+using System.Linq;
 
 namespace Gauniv.Client.ViewModel
 {
@@ -55,13 +56,13 @@ namespace Gauniv.Client.ViewModel
         [ObservableProperty]
         private bool isConnected = NetworkService.Instance.Token != null;
 
-        // Propriétés pour le téléchargement
+        // Properties related to downloading
         [ObservableProperty]
         private bool isDownloading = false;
         
         [ObservableProperty]
         private bool isUnzipping = false;
-        // Etat de pause
+        // Pause state
         [ObservableProperty]
         private bool isPaused = false;
         
@@ -73,6 +74,9 @@ namespace Gauniv.Client.ViewModel
 
         [ObservableProperty]
         private bool isDownloaded = false;
+
+        [ObservableProperty]
+        private bool isRunning = false;
 
         [ObservableProperty]
         private double progress = 0.0;
@@ -90,6 +94,10 @@ namespace Gauniv.Client.ViewModel
         [ObservableProperty]
         private bool isDownloadButtonEnabled = true;
 
+        // Local GameProcess instance to start/stop the game process
+        private GameProcess _gameProcess;
+        private bool isEventHandlerAttached = false;
+
         public GameDetailsViewModel()
         {
 
@@ -105,8 +113,11 @@ namespace Gauniv.Client.ViewModel
             var id = Int32.Parse(GameId);
             var gameDetails = await NetworkService.Instance.GamesClient.DetailsAsync(id);
             _game = gameDetails;
+            _gameProcess = GameProcessService.Instance.GetProcess(GameId);
             if (!(gameDetails?.IsOwned ?? false))
                 _currentState = GameState.NotOwned;
+            else if(_gameProcess.IsRunning)
+                _currentState = GameState.IsRunning;
             else if(DownloadService.Instance.IsGameDownloaded(_game.Name))
                 _currentState = GameState.Downloaded;
             else
@@ -117,9 +128,10 @@ namespace Gauniv.Client.ViewModel
         
         partial void OnGameIdChanged(string? value)
         {
-            // appelé automatiquement par ObservableProperty lorsque GameId change
+            // called automatically by ObservableProperty when GameId changes
             _ = LoadGameDetails();
         }
+
 
 
 
@@ -130,10 +142,10 @@ namespace Gauniv.Client.ViewModel
             try
             {
                 IsBuyButtonEnabled = false;
-                // Appel à l'API pour acheter le jeu
+                // Call API to purchase the game
                 await NetworkService.Instance.GamesClient.BuyAsync(Game.Id);
-                // Si l'appel réussit, rafraîchir les détails
-                // ajoute un wait de 10 seconds pour tester
+                // If call succeeds, refresh details
+                // add a 10 seconds wait for testing
                 await Task.Delay(10000);
 
                 var refreshed = await NetworkService.Instance.GamesClient.DetailsAsync(Game.Id);
@@ -150,25 +162,25 @@ namespace Gauniv.Client.ViewModel
             }
         }
 
-        // Commande de téléchargement
+        // Download command
         [RelayCommand]
         public Task Download()
         {
             return StartDownloadAsync(resume: false);
         }
 
-        // Commande de reprise
+        // Resume command
         [RelayCommand]
         public Task Resume()
         {
             return StartDownloadAsync(resume: true);
         }
 
-        // Commande de pause
+        // Pause command
         [RelayCommand]
         public void Pause()
         {
-            // Délégué vers le service qui annule le token
+            // Delegated to the service which cancels the token
             DownloadService.Instance.Pause();
             _currentState = GameState.Paused;
         }
@@ -177,7 +189,7 @@ namespace Gauniv.Client.ViewModel
         [RelayCommand]
         public void Cancel()
         {
-            // Délégué vers le service qui annule le token
+            // Delegated to the service which cancels the token
             DownloadService.Instance.CancelAndDeleteFile(Game?.Name ?? "");
             _currentState = GameState.OwnedNotDownloaded;
             DownloadPercent = "0.0";
@@ -196,7 +208,7 @@ namespace Gauniv.Client.ViewModel
 
             var deletedProgress = new Progress<double>(p =>
             {
-                // Mise à jour sur le thread UI est gérée automatiquement par Progress<T>
+                // UI thread update is handled automatically by Progress<T>
                 Progress = p;
                 DeletePercent = (p * 100).ToString("F2");
             });
@@ -206,6 +218,7 @@ namespace Gauniv.Client.ViewModel
                 _currentState = GameState.OwnedNotDownloaded;
             });
         }
+
 
 
 
@@ -223,7 +236,7 @@ namespace Gauniv.Client.ViewModel
 
                 var downloadProgress = new Progress<double>(p =>
                 {
-                    // Mise à jour sur le thread UI est gérée automatiquement par Progress<T>
+                    // UI thread update is handled automatically by Progress<T>
                     Progress = p;
                     DownloadPercent = (p * 100).ToString("F2");
                 });
@@ -243,10 +256,8 @@ namespace Gauniv.Client.ViewModel
                         await DownloadService.Instance.ResumeAsync(Game.Id.ToString(), Game.Name, downloadProgress, unzipProgressLooker);
                         
                         _currentState = GameState.Downloaded;
-                        MainThread.BeginInvokeOnMainThread(async () =>
-                        {
-                            await Application.Current?.Windows[0]?.Page?.DisplayAlertAsync("Téléchargement", "Téléchargement terminé", "OK")!;
-                        });
+                        // Use ShowAlertAsync to run on UI thread without async void
+                        await ShowAlertAsync("Download", "Download completed", "OK");
                     });
                 }
                 else
@@ -255,12 +266,9 @@ namespace Gauniv.Client.ViewModel
                     {
                         await DownloadService.Instance.DownloadFileAsync(Game.Id.ToString(), Game.Name, downloadProgress, unzipProgressLooker);
 
-                        // Téléchargement terminé
+                        // Download finished
                         _currentState = GameState.Downloaded;
-                        MainThread.BeginInvokeOnMainThread(async () =>
-                        {
-                            await Application.Current?.Windows[0]?.Page?.DisplayAlertAsync("Téléchargement", "Téléchargement terminé", "OK")!;
-                        });
+                        await ShowAlertAsync("Download", "Download completed", "OK");
                     });
                 }
             }
@@ -272,13 +280,115 @@ namespace Gauniv.Client.ViewModel
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Download failed: {ex}");
-                await Application.Current?.Windows[0]?.Page?.DisplayAlertAsync("Erreur", "Le téléchargement a échoué", "OK")!;
+                await ShowAlertAsync("Error", "Download failed", "OK");
             }
             finally
             {
                 if(_currentState != GameState.Downloaded && _currentState != GameState.Paused)
                     _currentState = GameState.OwnedNotDownloaded;
             }
+        }
+        
+
+        [RelayCommand]
+        public async Task Start()
+        {
+            if (Game == null) return;
+
+            var gameFolder = DownloadService.Instance.GetGameFolderPath(Game.Name);
+            if (!DownloadService.Instance.IsGameDownloaded(Game.Name))
+            {
+                await ShowAlertAsync("Error", "Game not installed. Please download it first.", "OK");
+                return;
+            }
+
+            // Check if already running
+            if (_gameProcess.IsRunning)
+            {
+                await ShowAlertAsync("Info", "The game is already running.", "OK");
+                _currentState = GameState.IsRunning;
+                AttachProcessEndEventHandler();
+                return;
+            }
+
+            // Try to launch
+            var status = _gameProcess.Launch(gameFolder);
+            switch (status)
+            {
+                case ProcessSuccessStartStatus.Success:
+                    _currentState = GameState.IsRunning;
+                    AttachProcessEndEventHandler();
+                    break;
+                case ProcessSuccessStartStatus.AlreadyRunning:
+                    await ShowAlertAsync("Info", "A game is already running.", "OK");
+                    _currentState = GameState.IsRunning;
+                    break;
+                case ProcessSuccessStartStatus.ExecutableNotFound:
+                    await ShowAlertAsync("Error", "Executable not found in the game's directory.", "OK");
+                    _currentState = GameState.OwnedNotDownloaded;
+                    break;
+                case ProcessSuccessStartStatus.FailedToStart:
+                default:
+                    await ShowAlertAsync("Error", "Unable to start the game.", "OK");
+                    _currentState = GameState.OwnedNotDownloaded;
+                    break;
+            }
+        }
+
+        [RelayCommand]
+        public async Task Stop()
+        {
+            if (!_gameProcess.IsRunning)
+            {
+                await ShowAlertAsync("Info", "No active game process.", "OK");
+                return;
+            }
+
+            await Task.Run(() =>
+            {
+                _gameProcess.Stop();
+            });
+
+            _currentState = GameState.Downloaded;
+        }
+
+        // Helper to show alerts safely on the UI thread
+        private Task ShowAlertAsync(string title, string message, string cancel = "OK")
+        {
+            var page = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"{title}: {message}");
+                return Task.CompletedTask;
+            }
+
+            // InvokeOnMainThreadAsync avoids async void
+            return MainThread.InvokeOnMainThreadAsync(() => page.DisplayAlertAsync(title, message, cancel));
+        }
+        
+        private void AttachProcessEndEventHandler()
+        {
+            if(isEventHandlerAttached)
+                return;
+            
+            isEventHandlerAttached = true;
+            _ = Task.Run(async () =>
+            {
+                var exitCode = await _gameProcess.WaitForExitAsync();
+                       
+
+                if (exitCode.HasValue)
+                {
+                    if (exitCode.Value != 0)
+                    {
+                        await ShowAlertAsync("Crash", $"The game terminated unexpectedly (code {exitCode}).", "OK");
+                    }
+                }
+
+                // Update state accordingly
+                _currentState = GameState.Downloaded;
+                isEventHandlerAttached = false;
+            });
         }
         
 
@@ -291,6 +401,7 @@ namespace Gauniv.Client.ViewModel
             IsUnzipping = newState == GameState.Unzipping;
             IsPaused = newState == GameState.Paused;
             IsDownloaded = newState == GameState.Downloaded;
+            IsRunning = newState == GameState.IsRunning;
             IsDownloadButtonEnabled = newState == GameState.OwnedNotDownloaded;
             IsUninstalling = newState == GameState.Uninstalling;
             IsProgressBarEnabled = newState is GameState.Downloading or GameState.Unzipping or GameState.Uninstalling or GameState.Paused;
@@ -305,6 +416,7 @@ namespace Gauniv.Client.ViewModel
         Downloaded,
         Unzipping,
         Uninstalling,
+        IsRunning,
         Paused
     }
 }

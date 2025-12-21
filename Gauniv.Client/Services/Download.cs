@@ -81,6 +81,12 @@ public class DownloadService
         Preferences.Set(GamesPathKey, path);
     }
     
+    public string GetGameFolderPath(string gameName)
+    {
+        gameName = FormatGameFileName(gameName);
+        return Path.Combine(GetDownloadPathFromPreferences(), gameName);
+    }
+    
     private string FormatGameFileName(string gameName)
     {
         return  gameName.Replace("\"", "").Replace("/", "-").Replace("\\", "-").Replace(" ", "_").Replace(":", "");

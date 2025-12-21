@@ -143,7 +143,7 @@ Please respect the team's standards for any future contribution
                         
                         
                         <Button Text="Play"
-                                Command="{Binding DownloadCommand}"
+                                Command="{Binding StartCommand}"
                                 TextColor="{StaticResource TextLight}"
                                 BackgroundColor="{StaticResource InputBackground}"
                                 HorizontalOptions="Start"
@@ -156,6 +156,14 @@ Please respect the team's standards for any future contribution
                                 HorizontalOptions="Start"
                                 IsVisible="{Binding IsDownloaded}"
                                 IsEnabled="{Binding IsDownloaded}" />
+                        
+                        <Button Text="Stop"
+                                Command="{Binding StopCommand}"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsRunning}"
+                                IsEnabled="{Binding IsRunning}" />
                         
                         <!-- Labels to show download/unzip progress -->
                         <Label Text="{Binding DownloadPercent, StringFormat='Downloading... {0}%'}"
@@ -170,6 +178,9 @@ Please respect the team's standards for any future contribution
                         <Label Text="{Binding UnzipPercent, StringFormat='Uninstalling... {0}%'}"
                                VerticalOptions="Center"
                                IsVisible="{Binding IsUninstalling}" />
+                        <Label Text="Game is running..."
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsRunning}" />
                     </HorizontalStackLayout>
 
                     <!-- ProgressBar pour le téléchargement -->
