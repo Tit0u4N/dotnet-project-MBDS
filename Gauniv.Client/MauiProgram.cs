@@ -57,15 +57,10 @@ namespace Gauniv.Client
 
             Task.Run(() =>
             {
+                // Replace the URL of your API here
                 const string apiUrl = "http://localhost:5231/";
                 NetworkService.Instance.SetBaseUrl(apiUrl);
                 
-                //TEMPORARY DEFAULT CREDENTIALS FOR TESTING
-                var username = "t@t.t";
-                var password = "1234";
-                NetworkService.Instance.Login(username, password).Wait();
-                
-
             });
             return app;
         }

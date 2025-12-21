@@ -39,16 +39,16 @@ public class LoginViewModel : ObservableObject
             bool success = await NetworkService.Instance.Login(Username, Password);
             if (success)
             {
-                NavigationService.Instance.Navigate<Index>([]);
+                NavigationService.Instance.Navigate<Index>([], true);
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Identifiants incorrects", "OK");
+                await AlertService.Instance.ShowAlertAsync("Error", "Invalid credentials", "OK");
             }
         }
         catch (Exception)
         {
-            await Application.Current.MainPage.DisplayAlert("Erreur", "Une erreur est survenue lors de la connexion", "OK");
+            await AlertService.Instance.ShowAlertAsync("Error", "An error occurred during login", "OK");
         }
     }
 }

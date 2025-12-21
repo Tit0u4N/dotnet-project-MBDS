@@ -7,8 +7,7 @@
              Title="Connexion"
              x:DataType="vm:LoginViewModel"
              BindingContext="{vm:LoginViewModel}"
-             BackgroundColor="{StaticResource Background}"
-             >
+             BackgroundColor="{StaticResource Background}">
 
 
     <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center" MaximumWidthRequest="500">

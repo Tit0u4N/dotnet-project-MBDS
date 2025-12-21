@@ -66,7 +66,7 @@ namespace Gauniv.Client.Services
             UserClient.BaseUrl = baseUrl;
         }
 
-        public event Action? OnConnected;
+        public event Action? OnConnectionChange;
         
         public async Task<bool> Login(string username, string password)
         {
@@ -81,7 +81,7 @@ namespace Gauniv.Client.Services
                 var response = await _webServerClient.LoginAsync(body, false, false);
                 Token = response.AccessToken;
                 
-                OnConnected?.Invoke();
+                OnConnectionChange?.Invoke();
 
                 return true;
             }
@@ -98,6 +98,7 @@ namespace Gauniv.Client.Services
             {
                 await UserClient.LogoutAsync();
                 Token = null;
+                OnConnectionChange?.Invoke();
                 return true;
             }
             catch (Exception e)
@@ -186,7 +187,7 @@ namespace Gauniv.Client.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to connect to OnlineHub: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Failed to connect to OnlineHub: {ex.Message}");
             }
         }
 
@@ -202,19 +203,19 @@ namespace Gauniv.Client.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error stopping SignalR connection: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Error stopping SignalR connection: {ex.Message}");
                     }
                     finally
                     {
                         await _hubConnection.DisposeAsync();
                         _hubConnection = null;
-                        Console.WriteLine("Disconnected from OnlineHub.");
+                        System.Diagnostics.Debug.WriteLine("Disconnected from OnlineHub.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to disconnect from OnlineHub: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Failed to disconnect from OnlineHub: {ex.Message}");
             }
         }
 

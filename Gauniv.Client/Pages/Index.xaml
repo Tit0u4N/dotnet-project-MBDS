@@ -35,9 +35,9 @@ Please respect the team's standards for any future contribution
              x:Class="Gauniv.Client.Pages.Index"
              Title="Index"
              x:DataType="vm:IndexViewModel"
-             BindingContext="{vm:IndexViewModel}">
+             BindingContext="{vm:IndexViewModel}"
+             BackgroundColor="{StaticResource Background}">
 
-    <!-- Remplacement de la VerticalStackLayout par une Grid pour contraindre la taille du CollectionView -->
     <Grid>
         
         <Grid
@@ -48,13 +48,13 @@ Please respect the team's standards for any future contribution
         </Grid>
         <Grid Padding="12">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" /> <!-- Header: recherche + picker -->
-                <RowDefinition Height="Auto" /> <!-- Loading + erreur -->
-                <RowDefinition Height="*" />    <!-- CollectionView: prend l'espace restant -->
+                <RowDefinition Height="Auto" /> <!-- Header -->
+                <RowDefinition Height="Auto" /> <!-- Error -->
+                <RowDefinition Height="*" />    <!-- Main grid (game list + filter panel) -->
                 <RowDefinition Height="Auto" /> <!-- Pagination -->
             </Grid.RowDefinitions>
 
-            <!-- Header: Search + page size picker -->
+            <!-- Header -->
             <Grid Grid.Row="0" VerticalOptions="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -62,28 +62,27 @@ Please respect the team's standards for any future contribution
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Logo centré -->
+                <!-- Logo-->
                 <Image Source="logo_vapeur_big.png" Grid.Column="1" HeightRequest="80" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" />
 
-                <!-- SearchBar et Picker collés à droite -->
+                <!-- SearchBar -->
                 <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
                     <SearchBar Placeholder="Search a game" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={RelativeSource Self}}" Text="{Binding SearchQuery}" HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" WidthRequest="300" />
-
                 </HorizontalStackLayout>
             </Grid>
 
-            <!-- Loading indicator and error -->
+            <!-- Error -->
             <VerticalStackLayout Grid.Row="1">
                 <Label TextColor="Red" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage}" />
             </VerticalStackLayout>
-            <!-- Games grid: occupe l'espace restant et est scrollable -->
+            
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0">
-                    <!-- CollectionView principal -->
+                    <!-- Game List -->
                     <CollectionView x:Name="GamesCollection"
                                     IsVisible="{Binding IsNotUpdating}"
                                     IsEnabled="{Binding IsNotUpdating}"
@@ -98,7 +97,7 @@ Please respect the team's standards for any future contribution
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="proxy:GameFullDto">
-                                    <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8">
+                                    <VerticalStackLayout BackgroundColor="{StaticResource CardBackground}" Padding="8"  MaximumWidthRequest="170">
                                         <Image Source="{Binding ImageUrl}"  HeightRequest="200" MaximumWidthRequest="150" Aspect="AspectFit" Margin="4"/>
                                         <Label Text="{Binding Name}" TextColor="{StaticResource TextLight}" LineBreakMode="TailTruncation" />
                                         <Label Text="{Binding Price, StringFormat='Price: {0:C}'}" TextColor="{StaticResource TextHighlight}" />
@@ -108,8 +107,7 @@ Please respect the team's standards for any future contribution
                     </CollectionView>
                 </Grid>
                 
-                    
-                <!-- Here put a list of categories with a select -->
+                <!-- Filters panel -->
                 <Grid Grid.Column="1">
                     
                     <Grid.RowDefinitions>
@@ -117,11 +115,11 @@ Please respect the team's standards for any future contribution
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+                    
                     <!-- Min / Max price -->
                     <HorizontalStackLayout Grid.Row="0" Spacing="8" HorizontalOptions="Center">
                         <VerticalStackLayout  Spacing="2" HorizontalOptions="Center">
                             <Label Text="Min price" FontSize="Micro" />
-                            <!-- Bind directly to the numeric property; Numeric keyboard -->
                             <Entry Text="{Binding MinPriceString, Mode=TwoWay}" Placeholder="0.00" WidthRequest="100" Keyboard="Numeric" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
@@ -130,7 +128,7 @@ Please respect the team's standards for any future contribution
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                         
-                    <!-- Category multi-picker : CollectionView avec CheckBox -->
+                    <!-- Category multi-picker  -->
                     <VerticalStackLayout Grid.Row="1" Spacing="2">
                         <Label Text="Categories" FontAttributes="Bold" />
                         <CollectionView ItemsSource="{Binding Categories}" SelectionMode="None" HeightRequest="240" WidthRequest="220" Margin="0,8,0,8">
@@ -138,7 +136,6 @@ Please respect the team's standards for any future contribution
                                 <DataTemplate x:DataType="proxy:CategoryDto">
                                     <HorizontalStackLayout Spacing="8" Padding="4">
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                                        <!-- Instead of a direct bool on the DTO, we handle selection via bindings to the ViewModel using an EventHandler on CheckedChanged via a command -->
                                         <Label Text="{Binding Title}" VerticalOptions="Center" />
                                     </HorizontalStackLayout>
                                 </DataTemplate>
@@ -146,9 +143,13 @@ Please respect the team's standards for any future contribution
                         </CollectionView>
                     </VerticalStackLayout>
 
-                    <!-- apply button (uses SearchCommand) -->
                     <VerticalStackLayout Grid.Row="2" Spacing="2" HorizontalOptions="Center">
-                        <Button Text="Filter" Command="{Binding SearchCommand}" HeightRequest="36" VerticalOptions="Center" />
+                        <Button Text="Filter" 
+                                Command="{Binding SearchCommand}" 
+                                HeightRequest="36" 
+                                VerticalOptions="Center"
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}" />
                     </VerticalStackLayout>
                 </Grid>
             </Grid>

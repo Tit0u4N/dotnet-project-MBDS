@@ -15,12 +15,12 @@ namespace Gauniv.Client.ViewModel
 
         public MenuViewModel()
         {
-            NetworkService.Instance.OnConnected += Instance_OnConnected;
+            NetworkService.Instance.OnConnectionChange += Instance_OnConnectionChange;
         }
 
-        private void Instance_OnConnected()
+        private void Instance_OnConnectionChange()
         {
-            IsConnected = true;
+            IsConnected = NetworkService.Instance.Token != null;
         }
     }
 }

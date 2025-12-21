@@ -1,7 +1,7 @@
 ﻿namespace Gauniv.Client.Services;
 
-using System.Net.Http.Headers;
 using System.IO.Compression;
+using System.Net.Http.Headers;
 
 public class DownloadService
 {

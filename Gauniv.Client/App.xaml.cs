@@ -37,14 +37,14 @@ namespace Gauniv.Client
             
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                Console.WriteLine("Unhandled exception:");
-                Console.WriteLine(e.ExceptionObject);
+                System.Diagnostics.Debug.WriteLine("Unhandled exception:");
+                System.Diagnostics.Debug.WriteLine(e.ExceptionObject);
             };
 
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
-                Console.WriteLine("Unobserved task exception:");
-                Console.WriteLine(e.Exception);
+                System.Diagnostics.Debug.WriteLine("Unobserved task exception:");
+                System.Diagnostics.Debug.WriteLine(e.Exception);
             };
         }
 

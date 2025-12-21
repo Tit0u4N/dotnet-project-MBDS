@@ -26,13 +26,8 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Maui.Controls;
 
 namespace Gauniv.Client.Services
 {

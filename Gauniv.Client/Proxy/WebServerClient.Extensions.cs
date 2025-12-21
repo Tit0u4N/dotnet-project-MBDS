@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using Gauniv.Client.Services;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+﻿using Gauniv.Client.Services;
 
 namespace Gauniv.Client.Proxy;
 

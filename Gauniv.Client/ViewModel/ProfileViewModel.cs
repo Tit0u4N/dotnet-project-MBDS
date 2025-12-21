@@ -2,8 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gauniv.Client.Pages;
-using Gauniv.Client.Services;
 using Gauniv.Client.Proxy;
+using Gauniv.Client.Services;
 
 namespace Gauniv.Client.ViewModel
 {
@@ -42,7 +42,6 @@ namespace Gauniv.Client.ViewModel
 
         public ProfileViewModel()
         {
-            // Charger la valeur persistée ou la valeur par défaut
             DownloadPath = DownloadService.Instance.GetDownloadPathFromPreferences();
 
             ChangeEmailCommand = new AsyncRelayCommand(ChangeEmailAsync);
@@ -64,14 +63,13 @@ namespace Gauniv.Client.ViewModel
                 ToastMessage = "Email changed successfully.";
                 IsLoading = false;
                 IsToastVisible = true;
-                // Hide the toast after a short delay
                 await Task.Delay(3000);
                 IsToastVisible = false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Change email failed: {ex.Message}");
-                await Application.Current?.Windows[0]?.Page?.DisplayAlertAsync("Error", $"Change email failed: {ex.Message}", "OK")!;
+                System.Diagnostics.Debug.WriteLine($"Change email failed: {ex.Message}");
+                await AlertService.Instance.ShowAlertAsync("Error", $"Change email failed: {ex.Message}", "OK")!;
             }
             finally
             {
@@ -92,14 +90,13 @@ namespace Gauniv.Client.ViewModel
                 ToastMessage = "Password changed successfully.";
                 IsLoading = false;
                 IsToastVisible = true;
-                // Hide the toast after a short delay
                 await Task.Delay(3000);
                 IsToastVisible = false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Change password failed: {ex.Message}");
-                await Application.Current?.Windows[0]?.Page?.DisplayAlertAsync("Error", $"Change password failed: {ex.Message}", "OK")!;
+                System.Diagnostics.Debug.WriteLine($"Change password failed: {ex.Message}");
+                await AlertService.Instance.ShowAlertAsync("Error", $"Change password failed: {ex.Message}", "OK")!;
             } 
             finally
             {
@@ -120,7 +117,7 @@ namespace Gauniv.Client.ViewModel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Save download path failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Save download path failed: {ex.Message}");
             }
 
             await Task.CompletedTask;
@@ -131,14 +128,17 @@ namespace Gauniv.Client.ViewModel
             IsLoading = true;
             try
             {
-                await NetworkService.Instance.Logout();
-                NavigationService.Instance.Navigate<LoginPage>(new Dictionary<string, object>());
+                var success = await NetworkService.Instance.Logout();
+                if (!success)
+                {
+                    throw new Exception("Logout failed on server.");
+                }
+                NavigationService.Instance.Navigate<LoginPage>(new Dictionary<string, object>(), true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Logout failed: {ex.Message}");
-                await Application.Current?.Windows[0]?.Page
-                    ?.DisplayAlertAsync("Error", $"Logout failed: {ex.Message}", "OK")!;
+                System.Diagnostics.Debug.WriteLine($"Logout failed: {ex.Message}");
+                await AlertService.Instance.ShowAlertAsync("Error", $"Logout failed: {ex.Message}", "OK")!;
             }
             finally
             {
