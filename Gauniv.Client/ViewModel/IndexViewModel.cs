@@ -6,7 +6,6 @@ using Gauniv.Client.Proxy;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 
 namespace Gauniv.Client.ViewModel
 {
@@ -16,7 +15,7 @@ namespace Gauniv.Client.ViewModel
         public ObservableCollection<GameFullDto> Games
         {
             get;
-            set => SetProperty(ref field, value);
+            private set => SetProperty(ref field, value);
         } = new ObservableCollection<GameFullDto>([]);
 
         public int[] PageSizes => new[] { 12, 24, 48 };
@@ -29,7 +28,7 @@ namespace Gauniv.Client.ViewModel
         private int pageSize = 12;
 
         [ObservableProperty]
-        private int pageIndex = 0;
+        private int pageIndex;
 
         [ObservableProperty]
         private int totalItems;
@@ -44,12 +43,18 @@ namespace Gauniv.Client.ViewModel
         private bool isLoading;
 
         [ObservableProperty]
-        private bool isNotUpdating = false;
+        private bool isNotUpdating;
+        
+        [ObservableProperty]
+        private bool isPrevPageEnabled = true;
+        
+        [ObservableProperty]
+        private bool isNextPageEnabled = true;
 
         [ObservableProperty]
         private string? errorMessage;
 
-        // Remplacé: on stocke la saisie utilisateur comme string pour pouvoir la nettoyer/formatter
+        //Remplacé : on stocke la saisie utilisateur comme string pour pouvoir la nettoyer/formatter
         [ObservableProperty]
         private string minPriceString = string.Empty;
         
@@ -64,8 +69,8 @@ namespace Gauniv.Client.ViewModel
         private GameFullDto? selectedGame;
 
         // Flags pour éviter les boucles lors du nettoyage/assignation
-        private bool _suppressMinPriceSanitize = false;
-        private bool _suppressMaxPriceSanitize = false;
+        private bool _suppressMinPriceSanitize;
+        private bool _suppressMaxPriceSanitize;
 
         public int CurrentPageDisplay => Math.Max(1, PageIndex + 1);
 
@@ -108,14 +113,12 @@ namespace Gauniv.Client.ViewModel
             OnPropertyChanged(nameof(CurrentPageDisplay));
         }
 
-        // Appelé automatiquement lorsque SelectedGame change via le binding XAML
         partial void OnSelectedGameChanged(GameFullDto? value)
         {
-            // value peut être null quand la sélection est désélectionnée; ignorer
             if (value == null) return;
 
             // Navigation asynchrone fire-and-forget (UI thread)
-            MainThread.BeginInvokeOnMainThread(async () =>
+            MainThread.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
@@ -134,18 +137,13 @@ namespace Gauniv.Client.ViewModel
                 }
             });
         }
-
-        // Lorsque l'utilisateur modifie MinPriceString via le binding, nettoyer et formater
+        
         partial void OnMinPriceStringChanged(string value)
         {
             if (_suppressMinPriceSanitize) return;
             _suppressMinPriceSanitize = true;
 
-            // Ne garder que chiffres, '.' ',' et '-' puis remplacer '.' par ',' (souhait de l'utilisateur)
-            var sanitized = cleanPriceString(value);
-
-            // Affecter directement le champ backing pour éviter de ré-appeler le setter auto-généré
-            minPriceString = sanitized;
+            MinPriceString = CleanPriceString(value);
             OnPropertyChanged(nameof(MinPriceString));
 
             _suppressMinPriceSanitize = false;
@@ -157,15 +155,13 @@ namespace Gauniv.Client.ViewModel
             if (_suppressMaxPriceSanitize) return;
             _suppressMaxPriceSanitize = true;
 
-            var sanitized = cleanPriceString(value);
-
-            maxPriceString = sanitized;
+            MaxPriceString = CleanPriceString(value);
             OnPropertyChanged(nameof(MaxPriceString));
 
             _suppressMaxPriceSanitize = false;
         }
 
-        private string cleanPriceString(string? s, bool forceToCorrect = false)
+        private string CleanPriceString(string? s, bool forceToCorrect = false)
         {
             if (string.IsNullOrWhiteSpace(s)) return string.Empty;
             var cleaned = new string((s ?? string.Empty).Where(c =>  c == '.' || c == ',' || char.IsDigit(c) ).ToArray());
@@ -174,7 +170,7 @@ namespace Gauniv.Client.ViewModel
             // standardiser sur '.' pour parsing invariant
             cleaned = cleaned.Replace(',', '.');
 
-            // Gérer plusieurs points: garder seulement le premier comme séparateur décimal
+            // Gérer plusieurs points : garder seulement le premier comme séparateur décimal
             int firstDot = cleaned.IndexOf('.');
             if (firstDot >= 0)
             {
@@ -182,8 +178,10 @@ namespace Gauniv.Client.ViewModel
                 cleaned = cleaned.Substring(0, firstDot + 1);
                 if(secondPart != string.Empty)
                 {
-                    if(secondPart.Length > 2)
+                    // garder seulement les deux premiers chiffres après la virgule
+                    if(secondPart.Length > 2) 
                         secondPart = secondPart.Substring(0, 2);
+                    // compléter avec des zéros si nécessaire pour avoir deux chiffres après la virgule
                     if(forceToCorrect)
                         secondPart = secondPart.PadRight(2, '0');
                     cleaned += secondPart;
@@ -196,11 +194,10 @@ namespace Gauniv.Client.ViewModel
             return cleaned;
         }
 
-        // Parse la chaîne utilisateur en double? en acceptant les formats "4,99" et "4.99" et en ignorant caractères non numériques
         private double? ParsePrice(string? s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
-            var cleaned = cleanPriceString(s, true);
+            var cleaned = CleanPriceString(s, true);
 
             if (double.TryParse(cleaned, NumberStyles.Float, CultureInfo.InvariantCulture, out double v))
                 return v;
@@ -220,8 +217,8 @@ namespace Gauniv.Client.ViewModel
                 var name = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery;
 
                 // Préparer les filtres de prix à partir des chaînes nettoyées
-                double? minPrice = ParsePrice(MinPriceString);
-                double? maxPrice = ParsePrice(MaxPriceString);
+                var minPrice = ParsePrice(MinPriceString);
+                var maxPrice = ParsePrice(MaxPriceString);
                 
                 // Récupérer les catégories sélectionnées depuis la liste client-side
                 var selectedCategoryIds = Categories?.Where(c => c.IsSelected).Select(c => c.Id) ?? Enumerable.Empty<int>();
@@ -231,14 +228,17 @@ namespace Gauniv.Client.ViewModel
                 TotalItems = dto.Total;
                 TotalPages = dto.TotalPages;
                 
-                var newGames = new ObservableCollection<GameFullDto>(dto.Results?.ToList()) ?? new ObservableCollection<GameFullDto>();
+                IsPrevPageEnabled = PageIndex > 0;
+                IsNextPageEnabled = PageIndex < TotalPages - 1;
+                
+                var newGames = dto.Results.Count > 0 ? new ObservableCollection<GameFullDto>(dto.Results.ToList()) : new ObservableCollection<GameFullDto>();
                 
                 await MainThread.InvokeOnMainThreadAsync(() =>{
                     try
                     {
                         IsNotUpdating  = false;
                         SelectedGame = null;
-                        int span = Math.Min(6, Math.Max(1, newGames.Count));
+                        var span = Math.Min(6, Math.Max(1, newGames.Count));
                         GridSpan = span;
                         Games = newGames;
                         IsNotUpdating  = true;

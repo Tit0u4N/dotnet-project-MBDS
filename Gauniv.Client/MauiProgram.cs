@@ -38,7 +38,11 @@ namespace Gauniv.Client
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>().UseMauiCommunityToolkit()
+                .UseMauiApp<App>()
+                .UseMauiCommunityToolkit(options =>
+                    {
+                        options.SetShouldEnableSnackbarOnWindows(true);
+                    })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -53,7 +57,15 @@ namespace Gauniv.Client
 
             Task.Run(() =>
             {
-                // Vous pouvez initialiser la connection au serveur a partir d'ici
+                const string apiUrl = "http://localhost:5231/";
+                NetworkService.Instance.SetBaseUrl(apiUrl);
+                
+                //TEMPORARY DEFAULT CREDENTIALS FOR TESTING
+                var username = "t@t.t";
+                var password = "1234";
+                NetworkService.Instance.Login(username, password).Wait();
+                
+
             });
             return app;
         }

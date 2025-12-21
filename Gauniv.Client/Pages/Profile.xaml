@@ -32,11 +32,71 @@ Please respect the team's standards for any future contribution
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
              x:Class="Gauniv.Client.Pages.Profile"
              Title="Profile"
+             x:DataType="vm:ProfileViewModel"
              BindingContext="{vm:ProfileViewModel}">
-    <VerticalStackLayout>
-        <Label Text="Profile" />
-    </VerticalStackLayout>
-    <!--
-    Ici on veut pouvoir changer sont nom d'utilisateur et son mot de passe ainsi que de dossier de sauvegarde des jeux
-    -->
+    <Grid>
+        <Grid
+            IsVisible="{Binding IsLoading}"
+            ZIndex="300"
+            BackgroundColor="#50000000">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </Grid>
+        <Grid
+            MaximumHeightRequest="100"
+            MaximumWidthRequest="500"
+            IsVisible="{Binding IsToastVisible}"
+            ZIndex="200"
+            BackgroundColor="#00FFFFFF">
+            <Border Padding="10" BackgroundColor="{StaticResource  CardBackground}" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,20,0,0">
+                <Label Text="{Binding ToastMessage}" TextColor="{StaticResource TextLight}" />
+            </Border>
+        </Grid>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <Label Text="Profile" FontSize="24" HorizontalOptions="Center" />
+
+            <!-- Change Email -->
+            <Border Padding="10" BackgroundColor="{StaticResource CardBackground}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Change Email" FontAttributes="Bold" />
+                    <Entry Placeholder="New email" Text="{Binding Email}" Keyboard="Email" />
+                    <Entry Placeholder="Current password" 
+                           IsPassword="True" 
+                           Text="{Binding PasswordForEmailChange}" />
+                    <Button Text="Save new mail" 
+                            TextColor="{StaticResource TextLight}"
+                            BackgroundColor="{StaticResource InputBackground}"
+                            Command="{Binding ChangeEmailCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Change Password -->
+            <Border Padding="10" BackgroundColor="{StaticResource CardBackground}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Change Password" FontAttributes="Bold" />
+                    <Entry Placeholder="Current password" IsPassword="True" Text="{Binding CurrentPassword}" />
+                    <Entry Placeholder="New password" IsPassword="True" Text="{Binding NewPassword}" />
+                    <Button Text="Save new password" 
+                            TextColor="{StaticResource TextLight}"
+                            BackgroundColor="{StaticResource InputBackground}"
+                            Command="{Binding ChangePasswordCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Download Path -->
+            <Border Padding="10" BackgroundColor="{StaticResource CardBackground}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Folder used to download the games:" FontAttributes="Bold" />
+                    <Label Text="{Binding DownloadPath}" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Change" 
+                                TextColor="{StaticResource TextLight}"
+                                BackgroundColor="{StaticResource InputBackground}"
+                                Command="{Binding SetDownloadPathCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>
+
